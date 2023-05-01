@@ -24,6 +24,8 @@ def map_entity_to_device_type(entity):
         return "vacuum"
     elif entity.startswith("camera."):
         return "camera"
+    elif entity.startswith("scene."):
+        return "scene"
     else:
         return None
 

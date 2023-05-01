@@ -673,3 +673,8 @@ class HomeAssistantCamera(HomeAssistantDevice):
     def __init__(self, connector, device_id, device_icon, device_name, device_state, device_attributes, device_area=None, update_signal=None):
         super().__init__(connector, device_id, device_icon,
                          device_name, device_state, device_attributes, device_area, update_signal)
+
+class HomeAssistantScene(HomeAssistantDevice):
+    def __init__(self, connector, device_id, device_icon, device_name, device_state, device_attributes, device_area=None, update_signal=None):
+        super().__init__(connector, device_id, device_icon,
+                         device_name, device_state, device_attributes, device_area, update_signal)

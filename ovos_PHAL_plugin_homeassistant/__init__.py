@@ -7,7 +7,7 @@ from ovos_utils.gui import GUIInterface
 from ovos_PHAL_plugin_homeassistant.logic.connector import HomeAssistantRESTConnector, HomeAssistantWSConnector
 from ovos_PHAL_plugin_homeassistant.logic.device import (HomeAssistantSensor,
                                                          HomeAssistantBinarySensor,
-                                                         HomeAssistantLight,
+                                                         HomeAssistantLight, HomeAssistantAutomation,
                                                          HomeAssistantMediaPlayer, HomeAssistantScene,
                                                          HomeAssistantVacuum, HomeAssistantSwitch,
                                                          HomeAssistantClimate, HomeAssistantCamera)
@@ -46,6 +46,7 @@ class HomeAssistantPlugin(PHALPlugin):
             "climate": HomeAssistantClimate,
             "camera": HomeAssistantCamera,
             "scene": HomeAssistantScene,
+            "automation": HomeAssistantAutomation,
         }
 
         # BUS API FOR HOME ASSISTANT

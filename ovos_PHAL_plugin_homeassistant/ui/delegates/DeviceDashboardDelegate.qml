@@ -69,6 +69,8 @@ ItemDelegate {
                     case "vacuum": return "../dashcards/VacuumCard.qml"
                     case "camera": return "../dashcards/CameraCard.qml"
                     case "switch": return "../dashcards/SwitchCard.qml"
+                    case "scene": return "../dashcards/SceneCard.qml"
+                    case "automation": return "../dashcards/AutomationCard.qml"
                 }
             }
         }

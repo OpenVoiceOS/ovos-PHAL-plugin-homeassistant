@@ -7,14 +7,14 @@ import QtGraphicalEffects 1.0
 import "../code/helper.js" as HelperJS
 
 Item {
-    id: sceneTemplateDashboardCard
+    id: switchTemplateDashboardCard
     Layout.fillWidth: true
     Layout.fillHeight: true
     property var device: modelData
     property bool isOn: device.state === "on" ? true : false
 
     Button {
-        id: sceneTemplateButton
+        id: switchTemplateButton
         height: Mycroft.Units.gridUnit * 6
         width: parent.width - Mycroft.Units.gridUnit / 2        
         anchors.centerIn: parent
@@ -49,11 +49,11 @@ Item {
         }
 
         onPressed: {
-            sceneTemplateButton.opacity = 0.5
+            switchTemplateButton.opacity = 0.5
         }
 
         onReleased: {
-            sceneTemplateButton.opacity = 1
+            switchTemplateButton.opacity = 1
         }        
     }
 }

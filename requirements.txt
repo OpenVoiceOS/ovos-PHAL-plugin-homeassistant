@@ -7,3 +7,4 @@ pytube~=12.1
 websockets~=10.4
 ovos-PHAL-plugin-oauth~=0.0.1
 nested-lookup~=0.2
+ovos-bus-client

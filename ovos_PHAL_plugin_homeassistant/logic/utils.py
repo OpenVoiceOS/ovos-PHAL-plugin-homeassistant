@@ -1,5 +1,6 @@
 # Utils for the plugin
 
+
 def map_entity_to_device_type(entity):
     """Map an entity to a device type.
 
@@ -26,8 +27,11 @@ def map_entity_to_device_type(entity):
         return "camera"
     elif entity.startswith("scene."):
         return "scene"
+    elif entity.startswith("automation."):
+        return "automation"
     else:
         return None
+
 
 def check_if_device_type_is_group(device_attributes):
     """Check if a device is a group.

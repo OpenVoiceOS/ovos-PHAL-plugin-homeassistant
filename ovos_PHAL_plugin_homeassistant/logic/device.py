@@ -796,3 +796,7 @@ class HomeAssistantAutomation(HomeAssistantDevice):
         super().__init__(
             connector, device_id, device_icon, device_name, device_state, device_attributes, device_area, update_signal
         )
+
+    def turn_off(self):
+        LOG.warning("Request to turn off an automation. This is not supported, as it will disable it instead.")
+        return

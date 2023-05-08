@@ -65,6 +65,7 @@ class HomeAssistantPlugin(PHALPlugin):
         self.bus.on("ovos.phal.plugin.homeassistant.call.supported.function",
                     self.handle_call_supported_function)
         self.bus.on("ovos.phal.plugin.homeassistant.start.oauth.flow", self.handle_start_oauth_flow)
+        self.bus.on("ovos.phal.plugin.homeassistant.assist.message", self.handle_assist_message)
 
         # GUI EVENTS
         self.bus.on("ovos-PHAL-plugin-homeassistant.home",
@@ -406,6 +407,18 @@ class HomeAssistantPlugin(PHALPlugin):
         for device in self.registered_devices:
             display_list_model.append(device.get_device_display_model())
         self.bus.emit(message.response(data=display_list_model))
+
+    def handle_assist_message(self, message):
+        """Handle a passthrough message to Home Assistant's Assist API.
+
+        Args:
+            message (Message): The message object
+        """
+        command: str = message.data.get("command")
+        if self.connector and type(self.connector) in (HomeAssistantWSConnector, HomeAssistantRESTConnector):
+            self.bus.emit(message.response(data=self.connector.send_assist_command(command)))
+        else:
+            self.bus.emit(message.response(data=None))
 
 # GUI INTERFACE HANDLERS
     def handle_show_dashboard(self, message=None):

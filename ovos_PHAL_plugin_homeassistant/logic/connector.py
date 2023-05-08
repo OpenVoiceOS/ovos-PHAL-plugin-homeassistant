@@ -6,7 +6,7 @@ import json
 import sys
 
 from ovos_utils.log import LOG
-from ovos_PHAL_plugin_homeassistant.logic.socketclient import HomeAssistantClient
+from ovos_PHAL_plugin_homeassistant.logic.socketclient import HomeAssistantClient, AssistRestMessage
 import nested_lookup
 
 
@@ -264,6 +264,23 @@ class HomeAssistantRESTConnector(HomeAssistantConnector):
         if response.status_code == 200:
             return json.loads(response.text)
 
+    def send_assist_command(self, command, arguments={}):
+        """Send a command to the Home Assistant Assist websocket endpoint.
+
+        Args:
+            command (string): Spoken command to send to Home Assistant.
+            arguments (dict, optional): Additional arguments to send. HA currently only supports 'language'
+        """
+        url = self.host + "/api/conversation/process"
+        payload: AssistRestMessage = {"text": command, "language": arguments.get("language", "en")}
+        response = requests.post(
+            url, data=json.dumps(payload), headers=self.headers)
+        if response.status_code == 200:
+            return json.loads(response.text)
+        else:
+            print("Error connecting to home assistant")
+            sys.exit(1)
+
 
 class HomeAssistantWSConnector(HomeAssistantConnector):
     def __init__(self, host, api_key, enable_debug=False):
@@ -375,6 +392,18 @@ class HomeAssistantWSConnector(HomeAssistantConnector):
                     break
 
         return devices
+
+    def send_assist_command(self, command, arguments={}):
+        """Send a command to the Home Assistant Assist websocket endpoint.
+
+        Args:
+            command (string): Spoken command to send to Home Assistant.
+            arguments (dict, optional): Additional arguments to send. HA currently only supports 'language'
+        """
+        self._connection.websocket.send_raw_command("conversation/process", {
+            "text": command,
+            "language": arguments.get("language", "en")
+            })
 
     def disconnect(self):
         self._connection.disconnect()

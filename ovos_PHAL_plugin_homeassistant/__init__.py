@@ -65,7 +65,7 @@ class HomeAssistantPlugin(PHALPlugin):
         self.bus.on("ovos.phal.plugin.homeassistant.call.supported.function",
                     self.handle_call_supported_function)
         self.bus.on("ovos.phal.plugin.homeassistant.start.oauth.flow", self.handle_start_oauth_flow)
-        self.bus.on("ovos.phal.plugin.homeassistant.assist.message", self.handle_assist_message)
+        self.bus.on("ovos.phal.plugin.homeassistant.assist.intent", self.handle_assist_message)
 
         # GUI EVENTS
         self.bus.on("ovos-PHAL-plugin-homeassistant.home",

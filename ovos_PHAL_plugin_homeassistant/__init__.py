@@ -415,7 +415,7 @@ class HomeAssistantPlugin(PHALPlugin):
             message (Message): The message object
         """
         command: str = message.data.get("command")
-        self.log.debug(f"Received assist command: {command}")
+        self.log.debug(f"Received Assist command: {command}")
         if self.connector and type(self.connector) in (HomeAssistantWSConnector, HomeAssistantRESTConnector):
             self.bus.emit(message.response(data=self.connector.send_assist_command(command)))
         else:

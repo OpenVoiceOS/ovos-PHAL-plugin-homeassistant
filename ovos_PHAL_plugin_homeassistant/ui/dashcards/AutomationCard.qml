@@ -41,11 +41,7 @@ Item {
         }
 
         onClicked: {
-            if(device.state == "off") {
-                Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_on", { "device_id": device.id })
-            } else {
-                Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_off", { "device_id": device.id })
-            }
+            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_on", { "device_id": device.id })
         }
 
         onPressed: {

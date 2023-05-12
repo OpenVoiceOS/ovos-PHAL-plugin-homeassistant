@@ -25,6 +25,7 @@ class HomeAssistantPlugin(PHALPlugin):
                 config (dict): The plugin configuration
         """
         super().__init__(bus=bus, name="ovos-PHAL-plugin-homeassistant", config=config)
+        LOG.level = "DEBUG"
         self.oauth_client_id = None
         self.munged_id = "ovos-PHAL-plugin-homeassistant_homeassistant-phal-plugin"
         self.temporary_instance = None

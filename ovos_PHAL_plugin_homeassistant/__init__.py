@@ -35,7 +35,6 @@ class HomeAssistantPlugin(PHALPlugin):
         self.integrator = Integrator(self.bus, self.gui)
         self.instance_available = False
         self.use_ws = False
-        self.enable_debug = self.config.get("debug", False)
         self.device_types = {
             "sensor": HomeAssistantSensor,
             "binary_sensor": HomeAssistantBinarySensor,
@@ -109,9 +108,9 @@ class HomeAssistantPlugin(PHALPlugin):
         """
         try:
             if self.use_ws:
-                validator = HomeAssistantWSConnector(host, api_key, self.enable_debug)
+                validator = HomeAssistantWSConnector(host, api_key)
             else:
-                validator = HomeAssistantRESTConnector(host, api_key, self.enable_debug)
+                validator = HomeAssistantRESTConnector(host, api_key)
 
             validator.get_all_devices()
 
@@ -168,11 +167,9 @@ class HomeAssistantPlugin(PHALPlugin):
         if configuration_host != "" and configuration_api_key != "":
             self.instance_available = True
             if self.use_ws:
-                self.connector = HomeAssistantWSConnector(configuration_host,
-                                                          configuration_api_key, self.enable_debug)
+                self.connector = HomeAssistantWSConnector(configuration_host, configuration_api_key)
             else:
-                self.connector = HomeAssistantRESTConnector(
-                    configuration_host, configuration_api_key, self.enable_debug)
+                self.connector = HomeAssistantRESTConnector(configuration_host, configuration_api_key)
             self.devices = self.connector.get_all_devices()
             self.registered_devices = []
             self.build_devices()
@@ -198,9 +195,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     device_icon = f"mdi:{device_type}"
                     device_state = device.get("state", None)
                     device_area = device.get("area_id", None)
-                    if self.enable_debug:
-                        LOG.info(
-                            f"Device added: {device_name} - {device_type} - {device_area}")
+                    LOG.debug(f"Device added: {device_name} - {device_type} - {device_area}")
 
                     device_attributes = device.get("attributes", {})
                     if device_type in self.device_types:
@@ -453,9 +448,8 @@ class HomeAssistantPlugin(PHALPlugin):
             self.gui["use_group_display"] = self.config.get("use_group_display", False)
             self.gui.show_page(page, override_idle=True)
 
-        if self.enable_debug:
-            LOG.debug("Using group display")
-            LOG.debug(self.config["use_group_display"])
+        LOG.debug("Using group display")
+        LOG.debug(self.config["use_group_display"])
 
     def handle_close_dashboard(self, message):
         """ Handle the close dashboard message
@@ -604,7 +598,7 @@ class HomeAssistantPlugin(PHALPlugin):
     def get_long_term_token(self, short_term_token):
         instance = self.temporary_instance.replace("http://", "ws://").replace("https://", "wss://")
         token = short_term_token
-        wsClient = HomeAssistantWSConnector(instance, token, self.enable_debug)
+        wsClient = HomeAssistantWSConnector(instance, token)
         client_name = "ovos-PHAL-plugin-homeassistant-" + str(uuid.uuid4().hex)[:4]
         token_response = wsClient.call_command("auth/long_lived_access_token", {"client_name": client_name, "lifespan": 1825})
 

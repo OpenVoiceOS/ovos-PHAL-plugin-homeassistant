@@ -11,14 +11,13 @@ import nested_lookup
 
 
 class HomeAssistantConnector:
-    def __init__(self, host, api_key, enable_debug=False):
+    def __init__(self, host, api_key):
         """Constructor
 
         Args:
             host (str): The host of the home assistant instance.
             api_key (str): The api key
         """
-        self.enable_debug = enable_debug
         self.host = host
         self.api_key = api_key
         self.event_listeners = {}
@@ -125,9 +124,8 @@ class HomeAssistantConnector:
 
 
 class HomeAssistantRESTConnector(HomeAssistantConnector):
-    def __init__(self, host, api_key, enable_debug=False):
+    def __init__(self, host, api_key):
         super().__init__(host, api_key)
-        self.enable_debug = enable_debug
         self.headers = {"Authorization": "Bearer " + self.api_key, "content-type": "application/json"}
 
     def register_callback(self, device_id, callback):
@@ -288,11 +286,10 @@ class HomeAssistantRESTConnector(HomeAssistantConnector):
 
 
 class HomeAssistantWSConnector(HomeAssistantConnector):
-    def __init__(self, host, api_key, enable_debug=False):
+    def __init__(self, host, api_key):
         super().__init__(host, api_key)
         if self.host.startswith("http"):
             self.host.replace("http", "ws", 1)
-        self.enable_debug = enable_debug
         self._connection = HomeAssistantClient(self.host, self.api_key)
         self._connection.connect()
 
@@ -318,12 +315,11 @@ class HomeAssistantWSConnector(HomeAssistantConnector):
                 self.event_listeners[entity_id](message)
 
     @staticmethod
-    def _device_entry_compat(devices: dict, enable_debug):
+    def _device_entry_compat(devices: dict):
         disabled_devices = list()
         for idx, dev in devices.items():
             if dev.get("disabled_by"):
-                if enable_debug:
-                    LOG.debug(f'Ignoring {dev.get("entity_id")} disabled by ' f'{dev.get("disabled_by")}')
+                LOG.debug(f'Ignoring {dev.get("entity_id")} disabled by ' f'{dev.get("disabled_by")}')
                 disabled_devices.append(idx)
             else:
                 devices[idx].setdefault("type", dev["entity_id"].split(".", 1)[0])
@@ -332,7 +328,7 @@ class HomeAssistantWSConnector(HomeAssistantConnector):
 
     def get_all_devices(self) -> list:
         devices = self.client.entity_registry
-        self._device_entry_compat(devices, self.enable_debug)
+        self._device_entry_compat(devices)
         devices_with_area = self.assign_group_for_devices(devices)
         return list(devices_with_area.values())
 
@@ -367,13 +363,11 @@ class HomeAssistantWSConnector(HomeAssistantConnector):
         return [d for d in devices if d["attributes"].get(attribute) not in value]
 
     def turn_on(self, device_id, device_type):
-        if self.enable_debug:
-            LOG.debug(f"Turn on {device_id}")
+        LOG.debug(f"Turn on {device_id}")
         self.client.call_service_sync(device_type, "turn_on", {"entity_id": device_id})
 
     def turn_off(self, device_id, device_type):
-        if self.enable_debug:
-            LOG.debug(f"Turn off {device_id}")
+        LOG.debug(f"Turn off {device_id}")
         self.client.call_service_sync(device_type, "turn_off", {"entity_id": device_id})
 
     def call_function(self, device_id, device_type, function, arguments=None):

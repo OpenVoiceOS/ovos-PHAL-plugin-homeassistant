@@ -35,7 +35,7 @@ class HomeAssistantPlugin(PHALPlugin):
         self.integrator = Integrator(self.bus, self.gui)
         self.instance_available = False
         self.use_ws = False
-        self.enable_debug = self.config.get("enable_debug", False)
+        self.enable_debug = self.config.get("debug", False)
         self.device_types = {
             "sensor": HomeAssistantSensor,
             "binary_sensor": HomeAssistantBinarySensor,

@@ -31,7 +31,6 @@ class HomeAssistantPlugin(PHALPlugin):
         self.connector = None
         self.registered_devices = []
         self.bus = bus
-        self.log = LOG
         self.gui = GUIInterface(bus=self.bus, skill_id=self.name)
         self.integrator = Integrator(self.bus, self.gui)
         self.instance_available = False
@@ -122,7 +121,7 @@ class HomeAssistantPlugin(PHALPlugin):
             return True
 
         except Exception as e:
-            self.log.error(e)
+            LOG.error(e)
             return False
 
     def setup_configuration(self, message):
@@ -196,7 +195,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     device_icon = f"mdi:{device_type}"
                     device_state = device.get("state", None)
                     device_area = device.get("area_id", None)
-                    self.log.debug(f"Device added: {device_name} - {device_type} - {device_area}")
+                    LOG.debug(f"Device added: {device_name} - {device_type} - {device_area}")
 
                     device_attributes = device.get("attributes", {})
                     if device_type in self.device_types:
@@ -204,9 +203,9 @@ class HomeAssistantPlugin(PHALPlugin):
                             self.connector, device_id, device_icon, device_name,
                             device_state, device_attributes, device_area, self.device_updated))
                     else:
-                        self.log.warning(f"Device type {device_type} not supported")
+                        LOG.warning(f"Device type {device_type} not supported")
                 else:
-                    self.log.warning(
+                    LOG.warning(
                         f"Device type {device_type} is a group, not supported currently")
 
     def build_display_dashboard_device_model(self):
@@ -338,7 +337,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     self.bus.emit(message.response(data=response))
                     return
         else:
-            self.log.warning("No device id provided")
+            LOG.warning("No device id provided")
 
     def handle_turn_off(self, message):
         """ Handle the turn off message
@@ -354,7 +353,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     self.bus.emit(message.response(data=response))
                     return
         else:
-            self.log.error("No device id provided")
+            LOG.error("No device id provided")
 
     def handle_call_supported_function(self, message):
         """ Handle the call supported function message
@@ -376,7 +375,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     self.bus.emit(message.response(data=response))
                     return
         else:
-            self.log.error("Device id or function name not provided")
+            LOG.error("Device id or function name not provided")
 
     def handle_get_device_display_model(self, message):
         """ Handle the get device display model message
@@ -411,7 +410,7 @@ class HomeAssistantPlugin(PHALPlugin):
             message (Message): The message object
         """
         command: str = message.data.get("command")
-        self.log.debug(f"Received Assist command: {command}")
+        LOG.debug(f"Received Assist command: {command}")
         if self.connector and type(self.connector) in (HomeAssistantWSConnector, HomeAssistantRESTConnector):
             self.bus.emit(message.response(data=self.connector.send_assist_command(command)))
         else:
@@ -449,8 +448,8 @@ class HomeAssistantPlugin(PHALPlugin):
             self.gui["use_group_display"] = self.config.get("use_group_display", False)
             self.gui.show_page(page, override_idle=True)
 
-        self.log.debug("Using group display")
-        self.log.debug(self.config["use_group_display"])
+        LOG.debug("Using group display")
+        LOG.debug(self.config["use_group_display"])
 
     def handle_close_dashboard(self, message):
         """ Handle the close dashboard message

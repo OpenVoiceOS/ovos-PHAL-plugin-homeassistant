@@ -1,9 +1,0 @@
-ovos-plugin-manager~=0.0.1
-ovos-utils~=0.0.27
-ovos-config~=0.0.5
-mycroft-messagebus-client~=0.10
-youtube-search~=2.1
-pytube~=12.1
-websockets~=10.4
-ovos-PHAL-plugin-oauth~=0.0.1
-nested-lookup~=0.2

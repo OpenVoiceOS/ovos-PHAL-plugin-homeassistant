@@ -1,8 +1,20 @@
 # Changelog
 
-## [Unreleased](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/HEAD)
+## [V0.0.2a2](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/V0.0.2a2) (2023-05-12)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/V0.0.1...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/V0.0.2a1...V0.0.2a2)
+
+**Closed issues:**
+
+- Add PyPI Automation [\#4](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/4)
+
+**Merged pull requests:**
+
+- Fix: disable empty qr code page [\#13](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/13) ([AIIX](https://github.com/AIIX))
+
+## [V0.0.2a1](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/V0.0.2a1) (2023-03-14)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/V0.0.1...V0.0.2a1)
 
 **Merged pull requests:**
 

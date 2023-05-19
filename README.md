@@ -2,6 +2,8 @@
 
 The PHAL Plugin provides GUI interfaces and API for Home Assistant Instants.
 
+NOTE: this plugin is roadmapped for merging with https://github.com/OpenVoiceOS/ovos-PHAL-plugin-commonIOT for ovos-core release 0.0.9, the UI will become IOT framework agnostic
+
 # Demo GIF
 ![HomeAssistant PHAL Demo](demo/demo.gif)
 

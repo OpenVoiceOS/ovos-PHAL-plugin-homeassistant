@@ -110,6 +110,7 @@ Popup {
                             hasAction: true
                             action: "ovos.phal.plugin.homeassistant.start.oauth.flow"
                             actionData: {"instance": instanceSetupPopupUrl.text}
+                            enabled: instanceSetupPopupUrl.length > 4 ? 1 : 0
                         }
 
                         InstanceGridButton {
@@ -118,6 +119,36 @@ Popup {
                             icon: Qt.resolvedUrl("icons/token-device.svg")
                             text: qsTr("Use Access Token")
                             hasAction: false
+                            enabled: instanceSetupPopupUrl.length > 4 ? 1 : 0
+                        }
+                    }
+
+                    Item {
+                        anchors.top: instanceSetupPopupUrl.bottom
+                        anchors.topMargin: Mycroft.Units.gridUnit * 0.5
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        visible: instanceSetupPopupUrl.length < 5 ? 1 : 0
+                        enabled: instanceSetupPopupUrl.length < 5 ? 1 : 0
+
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: parent.width * 0.8
+                            height: Mycroft.Units.gridUnit * 4
+                            color: "#000000"
+                            radius: 6
+
+                            Label {
+                                anchors.fill: parent
+                                anchors.margins: Mycroft.Units.gridUnit / 2
+                                text: qsTr("Fill Instance Address To Continue Setup")
+                                color: "white"
+                                font.bold: true
+                                wrapMode: Text.WordWrap
+                                maximumLineCount: 2
+                                elide: Text.ElideRight
+                            }
                         }
                     }
                 }

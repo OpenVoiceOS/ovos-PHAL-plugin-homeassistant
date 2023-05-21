@@ -313,7 +313,7 @@ class HomeAssistantPlugin(PHALPlugin):
         for device in self.registered_devices:
             device_list.append(device.get_device_display_model())
 
-        self.bus.emit(message.response(data=device_list))
+        self.bus.emit(message.response(data={"devices": device_list}))
 
     def handle_get_device(self, message):
         device_id = message.data.get("device_id", None)

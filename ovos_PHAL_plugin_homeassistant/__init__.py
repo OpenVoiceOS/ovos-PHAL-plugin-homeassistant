@@ -1,5 +1,10 @@
 import uuid
+import asyncio
+from copy import deepcopy
 from os.path import dirname, join
+from typing import Optional
+
+from pfzy import fuzzy_match
 from ovos_utils.log import LOG
 from mycroft_bus_client.message import Message
 from ovos_plugin_manager.phal import PHALPlugin
@@ -16,6 +21,19 @@ from ovos_PHAL_plugin_homeassistant.logic.utils import (map_entity_to_device_typ
                                                         check_if_device_type_is_group)
 from ovos_config.config import update_mycroft_config
 
+SUPPORTED_DEVICES = {
+            "sensor": HomeAssistantSensor,
+            "binary_sensor": HomeAssistantBinarySensor,
+            "light": HomeAssistantLight,
+            "media_player": HomeAssistantMediaPlayer,
+            "vacuum": HomeAssistantVacuum,
+            "switch": HomeAssistantSwitch,
+            "climate": HomeAssistantClimate,
+            "camera": HomeAssistantCamera,
+            "scene": HomeAssistantScene,
+            "automation": HomeAssistantAutomation,
+        }
+
 class HomeAssistantPlugin(PHALPlugin):
     def __init__(self, bus=None, config=None):
         """ Initialize the plugin
@@ -30,24 +48,14 @@ class HomeAssistantPlugin(PHALPlugin):
         self.munged_id = "ovos-PHAL-plugin-homeassistant_homeassistant-phal-plugin"
         self.temporary_instance = None
         self.connector = None
-        self.registered_devices = []
+        self.registered_devices = []  # Device objects
+        self.registered_device_names = []  # Device friendly/entity names
         self.bus = bus
         self.gui = GUIInterface(bus=self.bus, skill_id=self.name)
         self.integrator = Integrator(self.bus, self.gui)
         self.instance_available = False
         self.use_ws = False
-        self.device_types = {
-            "sensor": HomeAssistantSensor,
-            "binary_sensor": HomeAssistantBinarySensor,
-            "light": HomeAssistantLight,
-            "media_player": HomeAssistantMediaPlayer,
-            "vacuum": HomeAssistantVacuum,
-            "switch": HomeAssistantSwitch,
-            "climate": HomeAssistantClimate,
-            "camera": HomeAssistantCamera,
-            "scene": HomeAssistantScene,
-            "automation": HomeAssistantAutomation,
-        }
+        self.device_types = SUPPORTED_DEVICES
 
         # BUS API FOR HOME ASSISTANT
         self.bus.on("ovos.phal.plugin.homeassistant.get.devices",
@@ -203,8 +211,9 @@ class HomeAssistantPlugin(PHALPlugin):
                         self.registered_devices.append(self.device_types[device_type](
                             self.connector, device_id, device_icon, device_name,
                             device_state, device_attributes, device_area, self.device_updated))
+                        self.registered_device_names.append(device_name)
                     else:
-                        LOG.warning(f"Device type {device_type} not supported")
+                        LOG.warning(f"Device type {device_type} not supported; please file an issue on GitHub")
                 else:
                     LOG.warning(
                         f"Device type {device_type} is a group, not supported currently")
@@ -315,13 +324,44 @@ class HomeAssistantPlugin(PHALPlugin):
 
         self.bus.emit(message.response(data={"devices": device_list}))
 
-    def handle_get_device(self, message):
+    def handle_get_device(self, message: Message):
+        """Handle the message to get a single device
+
+        Args:
+            message (Message): The message object
+        """
+        # Device ID provided, usually GUI
         device_id = message.data.get("device_id", None)
         if device_id is not None:
-            for device in self.registered_devices:
-                if device.device_id == device_id:
-                    self.bus.emit(message.response(data=device))
-                    return
+            LOG.debug(f"Device ID provided in bus message: {device_id}")
+            return self._return_device_response(message, device_id)
+
+        # Device ID not provided, usually VUI
+        device = message.data.get("device")
+        device_result = self.fuzzy_match_name(
+                            self.registered_devices,
+                            device,
+                            self.registered_device_names
+                        )
+        LOG.debug(f"No device ID, found device result: {device_result or 'None'}")
+        if device_result:
+            return self._return_device_response(message, device_result)
+
+        # No device found
+        LOG.debug(f"No Home Assistant device exists for {device}")
+        self.bus.emit(message.response(data=None))
+
+    def _return_device_response(self, message, device_id) -> None:
+        """Return the device representation to the bus
+
+        Args:
+            message (Message): The message object to respond to
+            device_id (str): The device ID to lookup and return
+        """
+        for device in self.registered_devices:
+            if device.device_id == device_id:
+                return self.bus.emit(message.response(data=device.get_device_display_model()))
+        LOG.debug(f"No device found with device ID {device_id}")
         self.bus.emit(message.response(data=None))
 
     def handle_turn_on(self, message):
@@ -331,14 +371,23 @@ class HomeAssistantPlugin(PHALPlugin):
                 message (Message): The message object
         """
         device_id = message.data.get("device_id", None)
+        device = message.data.get("device", None)
+        spoken_device = deepcopy(device) or device_id
+        if device_id is None and device is not None:
+            device_id = self.fuzzy_match_name(
+                            self.registered_devices,
+                            device,
+                            self.registered_device_names
+                        )
+            LOG.debug(f"No device ID, found device result: {device_id or 'None'}")
         if device_id is not None:
             for device in self.registered_devices:
                 if device.device_id == device_id:
-                    response = device.turn_on()
-                    self.bus.emit(message.response(data=response))
-                    return
-        else:
-            LOG.warning("No device id provided")
+                    device.turn_on()
+                    return self.bus.emit(message.response(data={device: spoken_device}))
+        # No device found
+        LOG.debug(f"No Home Assistant device exists for {device}")
+        self.bus.emit(message.response(data=None))
 
     def handle_turn_off(self, message):
         """ Handle the turn off message
@@ -347,14 +396,23 @@ class HomeAssistantPlugin(PHALPlugin):
                 message (Message): The message object
         """
         device_id = message.data.get("device_id", None)
+        device = message.data.get("device", None)
+        spoken_device = deepcopy(device) or device_id
+        if device_id is None and device is not None:
+            device_id = self.fuzzy_match_name(
+                            self.registered_devices,
+                            device,
+                            self.registered_device_names
+                        )
+            LOG.debug(f"No device ID, found device result: {device_id or 'None'}")
         if device_id is not None:
             for device in self.registered_devices:
                 if device.device_id == device_id:
-                    response = device.turn_off()
-                    self.bus.emit(message.response(data=response))
-                    return
-        else:
-            LOG.error("No device id provided")
+                    device.turn_off()
+                    return self.bus.emit(message.response(data={device: spoken_device}))
+        # No device found
+        LOG.debug(f"No Home Assistant device exists for {device}")
+        self.bus.emit(message.response(data=None))
 
     def handle_call_supported_function(self, message):
         """ Handle the call supported function message
@@ -623,3 +681,20 @@ class HomeAssistantPlugin(PHALPlugin):
         # GUI only event as we don't want to flood the GUI bus
         self.gui.send_event("ovos.phal.plugin.homeassistant.device.updated", {"device_id": device_id})
         self.bus.emit(Message("ovos.phal.plugin.homeassistant.device.state.updated"))
+
+# UTILS
+    def fuzzy_match_name(self, devices_list, spoken_name, device_names) -> Optional[str]:
+        """Given a list of device names, fuzzy match the spoken name to the most likely one.
+        Returns the device id of the most likely match or None if no match is found.
+        """
+        # https://github.com/kazhala/pfzy/issues/1 fuzzy_match mutates its haystack
+        device_names_haystack = deepcopy(device_names)
+        try:
+            result = asyncio.run(fuzzy_match(spoken_name, device_names_haystack))
+            if result:
+                return devices_list[device_names.index(result[0].get("value"))].device_id
+            else:
+                return None
+        except TypeError:
+            LOG.error(f"Failed to fuzzy match device name {spoken_name}", exc_info=True)
+            return None

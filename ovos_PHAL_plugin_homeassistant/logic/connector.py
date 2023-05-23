@@ -6,7 +6,10 @@ import json
 import sys
 
 from ovos_utils.log import LOG
-from ovos_PHAL_plugin_homeassistant.logic.socketclient import HomeAssistantClient, AssistRestMessage
+from ovos_PHAL_plugin_homeassistant.logic.socketclient import (
+    HomeAssistantClient,
+    AssistRestMessage,
+)
 import nested_lookup
 
 
@@ -37,7 +40,9 @@ class HomeAssistantConnector:
         """
 
     @abstractmethod
-    def set_device_state(self, entity_id: str, state: str, attributes: Optional[dict] = None):
+    def set_device_state(
+        self, entity_id: str, state: str, attributes: Optional[dict] = None
+    ):
         """Set the state of a device.
 
         Args:
@@ -75,7 +80,9 @@ class HomeAssistantConnector:
         """
 
     @abstractmethod
-    def get_all_devices_with_type_and_attribute_not_in(self, device_type, attribute, value):
+    def get_all_devices_with_type_and_attribute_not_in(
+        self, device_type, attribute, value
+    ):
         """Get all devices with a specific type and attribute.
 
         Args:
@@ -126,7 +133,10 @@ class HomeAssistantConnector:
 class HomeAssistantRESTConnector(HomeAssistantConnector):
     def __init__(self, host, api_key):
         super().__init__(host, api_key)
-        self.headers = {"Authorization": "Bearer " + self.api_key, "content-type": "application/json"}
+        self.headers = {
+            "Authorization": "Bearer " + self.api_key,
+            "content-type": "application/json",
+        }
 
     def register_callback(self, device_id, callback):
         self.event_listeners[device_id] = callback
@@ -175,7 +185,9 @@ class HomeAssistantRESTConnector(HomeAssistantConnector):
             device_type (str): The type of the device.
         """
         devices = self.get_all_devices()
-        return [device for device in devices if device["entity_id"].startswith(device_type)]
+        return [
+            device for device in devices if device["entity_id"].startswith(device_type)
+        ]
 
     def get_all_devices_with_type_and_attribute(self, device_type, attribute, value):
         """Get all devices with a specific type and attribute.
@@ -189,7 +201,8 @@ class HomeAssistantRESTConnector(HomeAssistantConnector):
         return [
             device
             for device in devices
-            if device["entity_id"].startswith(device_type) and device["attributes"][attribute] == value
+            if device["entity_id"].startswith(device_type)
+            and device["attributes"][attribute] == value
         ]
 
     def get_all_devices_with_type_and_attribute_in(self, device_type, attribute, value):
@@ -204,10 +217,13 @@ class HomeAssistantRESTConnector(HomeAssistantConnector):
         return [
             device
             for device in devices
-            if device["entity_id"].startswith(device_type) and device["attributes"][attribute] in value
+            if device["entity_id"].startswith(device_type)
+            and device["attributes"][attribute] in value
         ]
 
-    def get_all_devices_with_type_and_attribute_not_in(self, device_type, attribute, value):
+    def get_all_devices_with_type_and_attribute_not_in(
+        self, device_type, attribute, value
+    ):
         """Get all devices with a specific type and attribute.
 
         Args:
@@ -219,7 +235,8 @@ class HomeAssistantRESTConnector(HomeAssistantConnector):
         return [
             device
             for device in devices
-            if device["entity_id"].startswith(device_type) and device["attributes"][attribute] not in value
+            if device["entity_id"].startswith(device_type)
+            and device["attributes"][attribute] not in value
         ]
 
     def turn_on(self, device_id, device_type):
@@ -276,7 +293,10 @@ class HomeAssistantRESTConnector(HomeAssistantConnector):
             arguments (dict, optional): Additional arguments to send. HA currently only supports 'language'
         """
         url = self.host + "/api/conversation/process"
-        payload: AssistRestMessage = {"text": command, "language": arguments.get("language", "en")}
+        payload: AssistRestMessage = {
+            "text": command,
+            "language": arguments.get("language", "en"),
+        }
         response = requests.post(url, data=json.dumps(payload), headers=self.headers)
         if response.status_code == 200:
             return json.loads(response.text)
@@ -319,7 +339,10 @@ class HomeAssistantWSConnector(HomeAssistantConnector):
         disabled_devices = list()
         for idx, dev in devices.items():
             if dev.get("disabled_by"):
-                LOG.debug(f'Ignoring {dev.get("entity_id")} disabled by ' f'{dev.get("disabled_by")}')
+                LOG.debug(
+                    f'Ignoring {dev.get("entity_id")} disabled by '
+                    f'{dev.get("disabled_by")}'
+                )
                 disabled_devices.append(idx)
             else:
                 devices[idx].setdefault("type", dev["entity_id"].split(".", 1)[0])
@@ -341,7 +364,9 @@ class HomeAssistantWSConnector(HomeAssistantConnector):
         except Exception as e:
             pass
 
-    def set_device_state(self, entity_id: str, state: str, attributes: Optional[dict] = None):
+    def set_device_state(
+        self, entity_id: str, state: str, attributes: Optional[dict] = None
+    ):
         LOG.debug(f"Handle request to modify entity: {entity_id}")
         resp = self.client.set_state(entity_id, state, attributes)
         LOG.debug(f"Client resp={resp}")
@@ -358,7 +383,9 @@ class HomeAssistantWSConnector(HomeAssistantConnector):
         devices = self.get_all_devices()
         return [d for d in devices if d["attributes"].get(attribute) in value]
 
-    def get_all_devices_with_type_and_attribute_not_in(self, device_type, attribute, value):
+    def get_all_devices_with_type_and_attribute_not_in(
+        self, device_type, attribute, value
+    ):
         devices = self.get_all_devices()
         return [d for d in devices if d["attributes"].get(attribute) not in value]
 
@@ -380,7 +407,9 @@ class HomeAssistantWSConnector(HomeAssistantConnector):
         return response
 
     def assign_group_for_devices(self, devices):
-        devices_from_registry = self.client.send_command_sync("config/device_registry/list")
+        devices_from_registry = self.client.send_command_sync(
+            "config/device_registry/list"
+        )
 
         for device_item in devices_from_registry["result"]:
             for device in devices.values():
@@ -398,7 +427,8 @@ class HomeAssistantWSConnector(HomeAssistantConnector):
             arguments (dict, optional): Additional arguments to send. HA currently only supports 'language'
         """
         return self._connection.send_raw_command(
-            "conversation/process", {"text": command, "language": arguments.get("language", "en")}
+            "conversation/process",
+            {"text": command, "language": arguments.get("language", "en")},
         )
 
     def disconnect(self):

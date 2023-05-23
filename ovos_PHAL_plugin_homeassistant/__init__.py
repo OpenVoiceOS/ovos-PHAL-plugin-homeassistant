@@ -384,7 +384,7 @@ class HomeAssistantPlugin(PHALPlugin):
             for device in self.registered_devices:
                 if device.device_id == device_id:
                     device.turn_on()
-                    return self.bus.emit(message.response(data={device: spoken_device}))
+                    return self.bus.emit(message.response(data={"device": spoken_device}))
         # No device found
         LOG.debug(f"No Home Assistant device exists for {device}")
         self.bus.emit(message.response(data=None))
@@ -409,7 +409,7 @@ class HomeAssistantPlugin(PHALPlugin):
             for device in self.registered_devices:
                 if device.device_id == device_id:
                     device.turn_off()
-                    return self.bus.emit(message.response(data={device: spoken_device}))
+                    return self.bus.emit(message.response(data={"device": spoken_device}))
         # No device found
         LOG.debug(f"No Home Assistant device exists for {device}")
         self.bus.emit(message.response(data=None))

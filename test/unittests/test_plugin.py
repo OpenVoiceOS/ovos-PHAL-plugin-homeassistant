@@ -174,7 +174,7 @@ class TestHomeAssistantPlugin(unittest.TestCase):
                     self.assertTrue(mock_bus.called)
                     self.assertTrue(mock_fuzzy_search.called)
 
-    def test_handle_turn_on(self):
+    def test_handle_turn_on_with_device_id(self):
         # Device passed explicitly
         fake_message = FakeMessage("ovos.phal.plugin.homeassistant.turn.on", {"device_id": "test_switch"}, None)
         with patch.object(self.plugin.device_types["switch"], "turn_on") as mock_call:
@@ -207,7 +207,7 @@ class TestHomeAssistantPlugin(unittest.TestCase):
                     self.assertTrue(mock_bus.called)
                     self.assertTrue(mock_fuzzy_search.called)
 
-    def test_handle_turn_off(self):
+    def test_handle_turn_off_with_device_id(self):
         # Device passed explicitly
         fake_message = FakeMessage("ovos.phal.plugin.homeassistant.turn.off", {"device_id": "test_switch"}, None)
         with patch.object(self.plugin.device_types["switch"], "turn_off") as mock_call:
@@ -236,6 +236,51 @@ class TestHomeAssistantPlugin(unittest.TestCase):
             with patch.object(self.plugin, "fuzzy_match_name", return_value=None) as mock_fuzzy_search:
                 with patch.object(self.plugin.bus, "emit") as mock_bus:
                     self.plugin.handle_turn_off(bad_message)
+                    self.assertFalse(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+
+    def test_handle_called_supported_function_with_device_id(self):
+        # Device passed explicitly
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.call.supported.function",
+            {"device_id": "test_switch", "function_name": "order_66", "function_args": "execute"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["switch"], "call_function") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_call_supported_function(fake_message)
+                    self.assertTrue(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertFalse(mock_fuzzy_search.called)
+
+    def test_handle_called_supported_function_fuzzy_search(self):
+        # Device exists but STT is fuzzy
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.call.supported.function",
+            {"device": "test switch", "function_name": "order_66", "function_args": "execute"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["switch"], "call_function") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value="test_switch") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_call_supported_function(fake_message)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+                    self.assertTrue(mock_call.called)
+
+    def test_handle_called_supported_function_device_does_not_exist(self):
+        # Device does not exist
+        bad_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.call.supported.function",
+            {"device": "NOT REAL", "function_name": "order_66", "function_args": "execute"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["switch"], "call_function") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value=None) as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_call_supported_function(bad_message)
                     self.assertFalse(mock_call.called)
                     self.assertTrue(mock_bus.called)
                     self.assertTrue(mock_fuzzy_search.called)

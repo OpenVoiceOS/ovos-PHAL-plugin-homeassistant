@@ -370,23 +370,14 @@ class HomeAssistantPlugin(PHALPlugin):
             Args:
                 message (Message): The message object
         """
-        device_id = message.data.get("device_id", None)
-        device = message.data.get("device", None)
-        spoken_device = deepcopy(device) or device_id
-        if device_id is None and device is not None:
-            device_id = self.fuzzy_match_name(
-                            self.registered_devices,
-                            device,
-                            self.registered_device_names
-                        )
-            LOG.debug(f"No device ID, found device result: {device_id or 'None'}")
+        device_id, spoken_device = self._gather_device_id(message)
         if device_id is not None:
             for device in self.registered_devices:
                 if device.device_id == device_id:
                     device.turn_on()
                     return self.bus.emit(message.response(data={"device": spoken_device}))
         # No device found
-        LOG.debug(f"No Home Assistant device exists for {device}")
+        LOG.debug(f"No Home Assistant device exists for {device_id}")
         self.bus.emit(message.response(data=None))
 
     def handle_turn_off(self, message):
@@ -395,6 +386,17 @@ class HomeAssistantPlugin(PHALPlugin):
             Args:
                 message (Message): The message object
         """
+        device_id, spoken_device = self._gather_device_id(message)
+        if device_id is not None:
+            for device in self.registered_devices:
+                if device.device_id == device_id:
+                    device.turn_off()
+                    return self.bus.emit(message.response(data={"device": spoken_device}))
+        # No device found
+        LOG.debug(f"No Home Assistant device exists for {device_id}")
+        self.bus.emit(message.response(data=None))
+
+    def _gather_device_id(self, message):
         device_id = message.data.get("device_id", None)
         device = message.data.get("device", None)
         spoken_device = deepcopy(device) or device_id
@@ -405,14 +407,7 @@ class HomeAssistantPlugin(PHALPlugin):
                             self.registered_device_names
                         )
             LOG.debug(f"No device ID, found device result: {device_id or 'None'}")
-        if device_id is not None:
-            for device in self.registered_devices:
-                if device.device_id == device_id:
-                    device.turn_off()
-                    return self.bus.emit(message.response(data={"device": spoken_device}))
-        # No device found
-        LOG.debug(f"No Home Assistant device exists for {device}")
-        self.bus.emit(message.response(data=None))
+        return device_id, spoken_device
 
     def handle_call_supported_function(self, message):
         """ Handle the call supported function message
@@ -420,7 +415,7 @@ class HomeAssistantPlugin(PHALPlugin):
         Args:
             message (Message): The message object
         """
-        device_id = message.data.get("device_id", None)
+        device_id, spoken_device = self._gather_device_id(message)
         function_name = message.data.get("function_name", None)
         function_args = message.data.get("function_args", None)
         if device_id is not None and function_name is not None:
@@ -431,10 +426,11 @@ class HomeAssistantPlugin(PHALPlugin):
                             function_name, function_args)
                     else:
                         response = device.call_function(function_name)
-                    self.bus.emit(message.response(data=response))
-                    return
+                    return self.bus.emit(message.response(data={"device": spoken_device, "response": response}))
         else:
-            LOG.error("Device id or function name not provided")
+            response = "Device id or function name not provided"
+            LOG.error(response)
+            return self.bus.emit(message.response(data={"device": spoken_device, "response": response}))
 
     def handle_get_device_display_model(self, message):
         """ Handle the get device display model message

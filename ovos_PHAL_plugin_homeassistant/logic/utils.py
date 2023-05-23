@@ -1,7 +1,5 @@
 # pylint: disable=missing-function-docstring,missing-class-docstring,missing-module-docstring
 # Utils for the plugin
-from typing import Optional
-from ovos_utils import LOG
 
 
 def map_entity_to_device_type(entity):
@@ -50,27 +48,6 @@ def check_if_device_type_is_group(device_attributes):
             return False
     else:
         return False
-
-
-def get_device_id(devices_list, spoken_name) -> Optional[str]:
-    device_names = []
-
-    if not devices_list:
-        LOG.info("No devices found")
-        return None
-
-    for device in devices_list:
-        if device.get("attributes", {}).get("friendly_name"):
-            device_names.append(device["attributes"]["friendly_name"].lower())
-        else:
-            device_names.append(device["name"].lower())
-    LOG.debug(device_names)
-    spoken_name = spoken_name.lower()
-    if spoken_name in device_names:
-        return devices_list[device_names.index(spoken_name)]["id"]
-    else:
-        fuzzy_result = fuzzy_match_name(devices_list, spoken_name, device_names)
-        return fuzzy_result if fuzzy_result else None
 
 
 def get_device_info(devices_list, device_id):

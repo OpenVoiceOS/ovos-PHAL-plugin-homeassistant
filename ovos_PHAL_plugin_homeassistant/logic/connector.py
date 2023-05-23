@@ -8,7 +8,7 @@ import sys
 from ovos_utils.log import LOG
 from ovos_PHAL_plugin_homeassistant.logic.socketclient import (
     HomeAssistantClient,
-    AssistRestMessage,
+    # AssistRestMessage,
 )
 import nested_lookup
 
@@ -293,7 +293,7 @@ class HomeAssistantRESTConnector(HomeAssistantConnector):
             arguments (dict, optional): Additional arguments to send. HA currently only supports 'language'
         """
         url = self.host + "/api/conversation/process"
-        payload: AssistRestMessage = {
+        payload = {
             "text": command,
             "language": arguments.get("language", "en"),
         }

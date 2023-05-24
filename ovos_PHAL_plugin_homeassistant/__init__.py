@@ -78,6 +78,7 @@ class HomeAssistantPlugin(PHALPlugin):
         self.bus.on("ovos.phal.plugin.homeassistant.get.light.brightness", self.handle_get_light_brightness)
         self.bus.on("ovos.phal.plugin.homeassistant.set.light.brightness", self.handle_set_light_brightness)
         self.bus.on("ovos.phal.plugin.homeassistant.increase.light.brightness", self.handle_increase_light_brightness)
+        self.bus.on("ovos.phal.plugin.homeassistant.decrease.light.brightness", self.handle_decrease_light_brightness)
 
         # GUI EVENTS
         self.bus.on("ovos-PHAL-plugin-homeassistant.home",

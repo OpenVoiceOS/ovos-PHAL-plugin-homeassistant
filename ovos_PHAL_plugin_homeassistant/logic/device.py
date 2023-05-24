@@ -1,6 +1,7 @@
 import requests
 import json
 from ovos_utils.log import LOG
+from webcolors import rgb_to_name
 
 
 class HomeAssistantDevice:
@@ -250,6 +251,15 @@ class HomeAssistantLight(HomeAssistantDevice):
     def get_rgb_color(self):
         """Get the rgb color of the light."""
         return self.device_attributes.get("rgb_color", [0, 0, 0])
+
+    def get_spoken_color(self):
+        """Get the spoken color value of the light."""
+        color = tuple(self.get_rgb_color)
+        try:
+            color = rgb_to_name(color)
+        except ValueError:
+            color = f"RGB code {color[0]}, {color[1]}, {color[2]}"
+        return color
 
     def get_supported_color_modes(self):
         """Get the supported color modes of the light."""

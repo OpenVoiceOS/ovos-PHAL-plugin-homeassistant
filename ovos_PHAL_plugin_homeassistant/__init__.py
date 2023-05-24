@@ -21,7 +21,6 @@ from ovos_PHAL_plugin_homeassistant.logic.utils import (map_entity_to_device_typ
                                                         check_if_device_type_is_group,
                                                         get_percentage_brightness_from_ha_value)
 from ovos_config.config import update_mycroft_config
-from webcolors import rgb_to_name
 
 SUPPORTED_DEVICES = {
             "sensor": HomeAssistantSensor,
@@ -469,11 +468,7 @@ class HomeAssistantPlugin(PHALPlugin):
         if device_id is not None:
             for device in self.registered_devices:
                 if device.device_id == device_id:
-                    color = device.get_rgb_color()
-                    try:
-                        color = rgb_to_name(color)
-                    except ValueError:
-                        color = f"RGB code {color[0]}, {color[1]}, {color[2]}"
+                    color = device.get_spoken_color()
                     return self.bus.emit(message.response(
                         data={
                             "device": spoken_device,

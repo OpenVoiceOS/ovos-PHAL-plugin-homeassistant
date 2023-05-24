@@ -265,7 +265,7 @@ class HomeAssistantLight(HomeAssistantDevice):
         Args:
             brightness (int): The brightness to set the light to.
         """
-        self.call_function("set_brightness", {"brightness": brightness})
+        self.call_function("turn_on", {"brightness": brightness})
 
     def increase_brightness(self):
         """Increase the brightness of the light by 10%."""

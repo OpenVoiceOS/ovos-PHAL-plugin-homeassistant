@@ -304,6 +304,7 @@ class HomeAssistantLight(HomeAssistantDevice):
             color (str): The color to set the light to.
         """
         rgb = name_to_rgb(color)
+        LOG.debug(f"Setting color to [{rgb.red}, {rgb.green}, {rgb.blue}]")
         self.set_rgb_color([rgb.red, rgb.green, rgb.blue])
         self.update_device()
 
@@ -349,7 +350,7 @@ class HomeAssistantLight(HomeAssistantDevice):
         Args:
             rgb_color (list): The rgb color to set the light to.
         """
-        self.call_function("set_rgb_color", {"rgb_color": rgb_color})
+        self.call_function("turn_on", {"rgb_color": rgb_color})
         self.update_device()
 
     def set_xy_color(self, xy_color):

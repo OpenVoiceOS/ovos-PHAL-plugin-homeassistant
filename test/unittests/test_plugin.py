@@ -518,3 +518,49 @@ class TestHomeAssistantPlugin(unittest.TestCase):
                     self.assertFalse(mock_call.called)
                     self.assertTrue(mock_bus.called)
                     self.assertTrue(mock_fuzzy_search.called)
+
+    # Set light color
+    def test_handle_set_light_color_with_device_id(self):
+        # Device passed explicitly
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.set.light.color",
+            {"device_id": "test_light", "color": "red"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "set_color") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_set_light_color(fake_message)
+                    self.assertTrue(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertFalse(mock_fuzzy_search.called)
+
+    def test_handle_set_light_color_fuzzy_search(self):
+        # Device exists but STT is fuzzy
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.set.light.color",
+            {"device": "test_light", "color": "red"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "set_color") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value="test_light") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_set_light_color(fake_message)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+                    self.assertTrue(mock_call.called)
+
+    def test_handle_set_light_color_device_does_not_exist(self):
+        # Device does not exist
+        bad_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.set.light.color",
+            {"device": "NOT REAL", "color": "red"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "set_color") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value=None) as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_set_light_color(bad_message)
+                    self.assertFalse(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)

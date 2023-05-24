@@ -1,7 +1,7 @@
 import requests
 import json
 from ovos_utils.log import LOG
-from webcolors import rgb_to_name
+from webcolors import name_to_rgb, rgb_to_name
 
 
 class HomeAssistantDevice:
@@ -290,11 +290,22 @@ class HomeAssistantLight(HomeAssistantDevice):
 
     def decrease_brightness(self) -> int:
         """Decrease the brightness of the light by 10%."""
-        decreased_value = max(self.get_brightness() * 0.9, 0)
+        current_brightness = self.get_brightness()
+        decreased_value = max(current_brightness - current_brightness * 0.1, 0)
         LOG.debug(f"Setting brightness to {decreased_value}")
         self.call_function("turn_on", {"brightness": decreased_value})
         self.update_device()
         return decreased_value
+
+    def set_color(self, color):
+        """Set the color of the light.
+
+        Args:
+            color (str): The color to set the light to.
+        """
+        rgb = name_to_rgb(color)
+        self.set_rgb_color([rgb.red, rgb.green, rgb.blue])
+        self.update_device()
 
     def set_color_mode(self, color_mode):
         """Set the color mode of the light.

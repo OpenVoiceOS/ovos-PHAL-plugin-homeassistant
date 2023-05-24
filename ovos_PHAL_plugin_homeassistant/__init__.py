@@ -80,6 +80,7 @@ class HomeAssistantPlugin(PHALPlugin):
         self.bus.on("ovos.phal.plugin.homeassistant.increase.light.brightness", self.handle_increase_light_brightness)
         self.bus.on("ovos.phal.plugin.homeassistant.decrease.light.brightness", self.handle_decrease_light_brightness)
         self.bus.on("ovos.phal.plugin.homeassistant.get.light.color", self.handle_get_light_color)
+        self.bus.on("ovos.phal.plugin.homeassistant.set.light.color", self.handle_set_light_color)
 
         # GUI EVENTS
         self.bus.on("ovos-PHAL-plugin-homeassistant.home",
@@ -478,6 +479,25 @@ class HomeAssistantPlugin(PHALPlugin):
             response = "Device id not provided"
             LOG.error(response)
             return self.bus.emit(message.response(data={"device": spoken_device, "response": response}))
+
+    def handle_set_light_color(self, message):
+        """ Handle the set light color message
+
+        Args:
+            message (Message): The message object
+        """
+        device_id, spoken_device = self._gather_device_id(message)
+        color = message.data.get("color")
+        for device in self.registered_devices:
+            if device.device_id == device_id:
+                device.set_color(color)
+                return self.bus.emit(message.response(data={
+                    "device": spoken_device,
+                    "color": color
+                    }))
+        response = "Device id not provided"
+        LOG.error(response)
+        return self.bus.emit(message.response(data={"device": spoken_device, "response": response}))
 
     def handle_set_light_brightness(self, message):
         """ Handle the set light brightness message

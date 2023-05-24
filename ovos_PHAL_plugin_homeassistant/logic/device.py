@@ -135,8 +135,8 @@ class HomeAssistantDevice:
         device = self.connector.get_device_state(self.device_id)
         self.device_state = device["state"]
         self.device_attributes = device["attributes"]
-        self.device_icon = device["attributes"]["icon"]
-        self.device_name = device["attributes"]["friendly_name"]
+        self.device_icon = device["attributes"].get("icon", "")
+        self.device_name = device["attributes"].get("friendly_name", "")
 
     def set_device_attribute(self, device_id, attribute, value):
         """Set an attribute of the device.

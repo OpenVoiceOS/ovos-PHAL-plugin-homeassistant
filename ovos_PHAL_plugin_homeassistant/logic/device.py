@@ -254,7 +254,7 @@ class HomeAssistantLight(HomeAssistantDevice):
 
     def get_spoken_color(self):
         """Get the spoken color value of the light."""
-        color = tuple(self.get_rgb_color)
+        color = tuple(self.get_rgb_color())
         try:
             color = rgb_to_name(color)
         except ValueError:

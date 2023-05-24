@@ -266,6 +266,7 @@ class HomeAssistantLight(HomeAssistantDevice):
             brightness (int): The brightness to set the light to.
         """
         self.call_function("turn_on", {"brightness": brightness})
+        self.update_device()
 
     def increase_brightness(self):
         """Increase the brightness of the light by 10%."""
@@ -273,6 +274,7 @@ class HomeAssistantLight(HomeAssistantDevice):
         bumped_value = min(current_brightness + current_brightness * 0.1, 255)
         LOG.debug(f"Setting brightness to {bumped_value}")
         self.call_function("turn_on", {"brightness": bumped_value})
+        self.update_device()
         return bumped_value
 
     def decrease_brightness(self):
@@ -280,6 +282,7 @@ class HomeAssistantLight(HomeAssistantDevice):
         decreased_value = max(self.get_brightness() * 0.9, 0)
         LOG.debug(f"Setting brightness to {decreased_value}")
         self.call_function("turn_on", {"brightness": decreased_value})
+        self.update_device()
         return decreased_value
 
     def set_color_mode(self, color_mode):
@@ -289,6 +292,7 @@ class HomeAssistantLight(HomeAssistantDevice):
             color_mode (str): The color mode to set the light to.
         """
         self.call_function("set_color_mode", {"color_mode": color_mode})
+        self.update_device()
 
     def set_color_temp(self, color_temp):
         """Set the color temperature of the light.
@@ -297,6 +301,7 @@ class HomeAssistantLight(HomeAssistantDevice):
             color_temp (int): The color temperature to set the light to.
         """
         self.call_function("set_color_temp", {"color_temp": color_temp})
+        self.update_device()
 
     def set_effect(self, effect):
         """Set the effect of the light.
@@ -305,6 +310,7 @@ class HomeAssistantLight(HomeAssistantDevice):
             effect (str): The effect to set the light to.
         """
         self.call_function("set_effect", {"effect": effect})
+        self.update_device()
 
     def set_hs_color(self, hs_color):
         """Set the hs color of the light.
@@ -313,6 +319,7 @@ class HomeAssistantLight(HomeAssistantDevice):
             hs_color (list): The hs color to set the light to.
         """
         self.call_function("set_hs_color", {"hs_color": hs_color})
+        self.update_device()
 
     def set_rgb_color(self, rgb_color):
         """Set the rgb color of the light.
@@ -321,6 +328,7 @@ class HomeAssistantLight(HomeAssistantDevice):
             rgb_color (list): The rgb color to set the light to.
         """
         self.call_function("set_rgb_color", {"rgb_color": rgb_color})
+        self.update_device()
 
     def set_xy_color(self, xy_color):
         """Set the xy color of the light.
@@ -329,6 +337,7 @@ class HomeAssistantLight(HomeAssistantDevice):
             xy_color (list): The xy color to set the light to.
         """
         self.call_function("set_xy_color", {"xy_color": xy_color})
+        self.update_device()
 
 
 class HomeAssistantSwitch(HomeAssistantDevice):
@@ -441,6 +450,7 @@ class HomeAssistantCover(HomeAssistantDevice):
             position (int): The position to set the cover to.
         """
         self.call_function("set_position", {"position": position})
+        self.update_device()
 
     def stop(self):
         """Stop the cover."""
@@ -571,6 +581,7 @@ class HomeAssistantClimate(HomeAssistantDevice):
             temperature (float): The temperature to set the climate device to.
         """
         self.call_function("set_temperature", {"temperature": temperature})
+        self.update_device()
 
     def set_hvac_mode(self, hvac_mode):
         """Set the hvac mode of the climate device.
@@ -579,6 +590,7 @@ class HomeAssistantClimate(HomeAssistantDevice):
             hvac_mode (str): The hvac mode to set the climate device to.
         """
         self.call_function("set_hvac_mode", {"hvac_mode": hvac_mode})
+        self.update_device()
 
     def set_fan_mode(self, fan_mode):
         """Set the fan mode of the climate device.
@@ -587,6 +599,7 @@ class HomeAssistantClimate(HomeAssistantDevice):
             fan_mode (str): The fan mode to set the climate device to.
         """
         self.call_function("set_fan_mode", {"fan_mode": fan_mode})
+        self.update_device()
 
     def set_swing_mode(self, swing_mode):
         """Set the swing mode of the climate device.
@@ -595,6 +608,7 @@ class HomeAssistantClimate(HomeAssistantDevice):
             swing_mode (str): The swing mode to set the climate device to.
         """
         self.call_function("set_swing_mode", {"swing_mode": swing_mode})
+        self.update_device()
 
     def set_preset_mode(self, preset_mode):
         """Set the preset mode of the climate device.
@@ -603,6 +617,7 @@ class HomeAssistantClimate(HomeAssistantDevice):
             preset_mode (str): The preset mode to set the climate device to.
         """
         self.call_function("set_preset_mode", {"preset_mode": preset_mode})
+        self.update_device()
 
     def set_aux_heat(self, aux_heat):
         """Set the aux heat of the climate device.
@@ -611,6 +626,7 @@ class HomeAssistantClimate(HomeAssistantDevice):
             aux_heat (bool): The aux heat to set the climate device to.
         """
         self.call_function("set_aux_heat", {"aux_heat": aux_heat})
+        self.update_device()
 
     def set_humidity(self, humidity):
         """Set the humidity of the climate device.
@@ -619,6 +635,7 @@ class HomeAssistantClimate(HomeAssistantDevice):
             humidity (float): The humidity to set the climate device to.
         """
         self.call_function("set_humidity", {"humidity": humidity})
+        self.update_device()
 
     def set_target_humidity(self, target_humidity):
         """ Set the target humidity of the climate device.\
@@ -627,6 +644,7 @@ class HomeAssistantClimate(HomeAssistantDevice):
             target_humidity (float): The target humidity to set the climate device to.
         """
         self.call_function("set_target_humidity", {"target_humidity": target_humidity})
+        self.update_device()
 
     def set_target_temp_low(self, target_temp_low):
         """Set the target temp low of the climate device.
@@ -635,6 +653,7 @@ class HomeAssistantClimate(HomeAssistantDevice):
             target_temp_low (float): The target temp low to set the climate device to.
         """
         self.call_function("set_target_temp_low", {"target_temp_low": target_temp_low})
+        self.update_device()
 
     def set_target_temp_high(self, target_temp_high):
         """Set the target temp high of the climate device.
@@ -643,6 +662,7 @@ class HomeAssistantClimate(HomeAssistantDevice):
             target_temp_high (float): The target temp high to set the climate device to.
         """
         self.call_function("set_target_temp_high", {"target_temp_high": target_temp_high})
+        self.update_device()
 
     def get_current_temperature(self):
         """Get the current temperature of the climate device."""
@@ -736,6 +756,7 @@ class HomeAssistantVacuum(HomeAssistantDevice):
             fan_speed (str): The fan speed to set the vacuum to.
         """
         self.set_device_attribute(self.device_id, "fan_speed", fan_speed)
+        self.update_device()
 
     def send_command(self, command, params):
         """Send a command to the vacuum.

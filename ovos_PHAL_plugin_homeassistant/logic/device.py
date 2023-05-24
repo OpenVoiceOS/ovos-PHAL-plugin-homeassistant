@@ -265,10 +265,11 @@ class HomeAssistantLight(HomeAssistantDevice):
         Args:
             brightness (int): The brightness to set the light to.
         """
+        LOG.debug(f"Setting brightness to {brightness}")
         self.call_function("turn_on", {"brightness": brightness})
         self.update_device()
 
-    def increase_brightness(self):
+    def increase_brightness(self) -> int:
         """Increase the brightness of the light by 10%."""
         current_brightness = self.get_brightness()
         bumped_value = min(current_brightness + current_brightness * 0.1, 255)
@@ -277,7 +278,7 @@ class HomeAssistantLight(HomeAssistantDevice):
         self.update_device()
         return bumped_value
 
-    def decrease_brightness(self):
+    def decrease_brightness(self) -> int:
         """Decrease the brightness of the light by 10%."""
         decreased_value = max(self.get_brightness() * 0.9, 0)
         LOG.debug(f"Setting brightness to {decreased_value}")

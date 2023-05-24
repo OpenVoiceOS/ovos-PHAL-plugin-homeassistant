@@ -21,6 +21,7 @@ from ovos_PHAL_plugin_homeassistant.logic.utils import (map_entity_to_device_typ
                                                         check_if_device_type_is_group,
                                                         get_percentage_brightness_from_ha_value)
 from ovos_config.config import update_mycroft_config
+from webcolors import rgb_to_name
 
 SUPPORTED_DEVICES = {
             "sensor": HomeAssistantSensor,
@@ -79,6 +80,7 @@ class HomeAssistantPlugin(PHALPlugin):
         self.bus.on("ovos.phal.plugin.homeassistant.set.light.brightness", self.handle_set_light_brightness)
         self.bus.on("ovos.phal.plugin.homeassistant.increase.light.brightness", self.handle_increase_light_brightness)
         self.bus.on("ovos.phal.plugin.homeassistant.decrease.light.brightness", self.handle_decrease_light_brightness)
+        self.bus.on("ovos.phal.plugin.homeassistant.get.light.color", self.handle_get_light_color)
 
         # GUI EVENTS
         self.bus.on("ovos-PHAL-plugin-homeassistant.home",
@@ -451,6 +453,31 @@ class HomeAssistantPlugin(PHALPlugin):
                         data={
                             "device": spoken_device,
                             "brightness": get_percentage_brightness_from_ha_value(device.get_brightness())
+                            }))
+        else:
+            response = "Device id not provided"
+            LOG.error(response)
+            return self.bus.emit(message.response(data={"device": spoken_device, "response": response}))
+
+    def handle_get_light_color(self, message):
+        """ Handle the get light color VUI message
+
+        Args:
+            message (Message): The message object
+        """
+        device_id, spoken_device = self._gather_device_id(message)
+        if device_id is not None:
+            for device in self.registered_devices:
+                if device.device_id == device_id:
+                    color = device.get_rgb_color()
+                    try:
+                        color = rgb_to_name(color)
+                    except ValueError:
+                        color = f"RGB code {color[0]}, {color[1]}, {color[2]}"
+                    return self.bus.emit(message.response(
+                        data={
+                            "device": spoken_device,
+                            "color": color
                             }))
         else:
             response = "Device id not provided"

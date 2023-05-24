@@ -145,6 +145,7 @@ class TestHomeAssistantPlugin(unittest.TestCase):
         print(f"Post-fuzzy_match: {self.plugin.registered_device_names[0]}")
         self.assertIsInstance(self.plugin.registered_device_names[0], str)
 
+    # Get device
     def test_return_device_response_when_passed_explicitly(self):
         # Device passed explicitly
         fake_message = FakeMessage("ovos.phal.plugin.homeassistant.turn.on", {"device_id": "test_switch"}, None)
@@ -174,6 +175,7 @@ class TestHomeAssistantPlugin(unittest.TestCase):
                     self.assertTrue(mock_bus.called)
                     self.assertTrue(mock_fuzzy_search.called)
 
+    # Turn on device
     def test_handle_turn_on_with_device_id(self):
         # Device passed explicitly
         fake_message = FakeMessage("ovos.phal.plugin.homeassistant.turn.on", {"device_id": "test_switch"}, None)
@@ -207,6 +209,7 @@ class TestHomeAssistantPlugin(unittest.TestCase):
                     self.assertTrue(mock_bus.called)
                     self.assertTrue(mock_fuzzy_search.called)
 
+    # Turn off device
     def test_handle_turn_off_with_device_id(self):
         # Device passed explicitly
         fake_message = FakeMessage("ovos.phal.plugin.homeassistant.turn.off", {"device_id": "test_switch"}, None)
@@ -240,6 +243,7 @@ class TestHomeAssistantPlugin(unittest.TestCase):
                     self.assertTrue(mock_bus.called)
                     self.assertTrue(mock_fuzzy_search.called)
 
+    # Call supported function
     def test_handle_called_supported_function_with_device_id(self):
         # Device passed explicitly
         fake_message = FakeMessage(
@@ -281,6 +285,190 @@ class TestHomeAssistantPlugin(unittest.TestCase):
             with patch.object(self.plugin, "fuzzy_match_name", return_value=None) as mock_fuzzy_search:
                 with patch.object(self.plugin.bus, "emit") as mock_bus:
                     self.plugin.handle_call_supported_function(bad_message)
+                    self.assertFalse(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+
+    # Get light brightness
+    def test_handle_get_light_brightness_with_device_id(self):
+        # Device passed explicitly
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.get.light.brightness",
+            {"device_id": "test_light"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "get_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_get_light_brightness(fake_message)
+                    self.assertTrue(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertFalse(mock_fuzzy_search.called)
+
+    def test_handle_get_light_brightness_fuzzy_search(self):
+        # Device exists but STT is fuzzy
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.get.light.brightness",
+            {"device": "test_switch"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "get_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value="test_light") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_get_light_brightness(fake_message)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+                    self.assertTrue(mock_call.called)
+
+    def test_handle_get_light_brightness_device_does_not_exist(self):
+        # Device does not exist
+        bad_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.get.light.brightness",
+            {"device": "NOT REAL"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "get_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value=None) as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_get_light_brightness(bad_message)
+                    self.assertFalse(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+
+    # Set
+    def test_handle_set_light_brightness_with_device_id(self):
+        # Device passed explicitly
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.set.light.brightness",
+            {"device_id": "test_light", "brightness": 200},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "set_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_set_light_brightness(fake_message)
+                    self.assertTrue(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertFalse(mock_fuzzy_search.called)
+
+    def test_handle_set_light_brightness_fuzzy_search(self):
+        # Device exists but STT is fuzzy
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.set.light.brightness",
+            {"device": "test_switch", "brightness": 200},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "set_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value="test_light") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_set_light_brightness(fake_message)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+                    self.assertTrue(mock_call.called)
+
+    def test_handle_set_light_brightness_device_does_not_exist(self):
+        # Device does not exist
+        bad_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.set.light.brightness",
+            {"device": "NOT REAL", "brightness": 200},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "set_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value=None) as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_set_light_brightness(bad_message)
+                    self.assertFalse(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+
+    # Increase
+    def test_handle_increase_light_brightness_with_device_id(self):
+        # Device passed explicitly
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.increase.light.brightness",
+            {"device_id": "test_light"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "increase_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_increase_light_brightness(fake_message)
+                    self.assertTrue(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertFalse(mock_fuzzy_search.called)
+
+    def test_handle_increase_light_brightness_fuzzy_search(self):
+        # Device exists but STT is fuzzy
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.increase.light.brightness",
+            {"device": "test_switch"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "increase_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value="test_light") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_increase_light_brightness(fake_message)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+                    self.assertTrue(mock_call.called)
+
+    def test_handle_increase_light_brightness_device_does_not_exist(self):
+        # Device does not exist
+        bad_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.increase.light.brightness",
+            {"device": "NOT REAL"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "increase_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value=None) as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_increase_light_brightness(bad_message)
+                    self.assertFalse(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+
+    # Decrease
+    def test_handle_decrease_light_brightness_with_device_id(self):
+        # Device passed explicitly
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.decrease.light.brightness",
+            {"device_id": "test_light"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "decrease_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_decrease_light_brightness(fake_message)
+                    self.assertTrue(mock_call.called)
+                    self.assertTrue(mock_bus.called)
+                    self.assertFalse(mock_fuzzy_search.called)
+
+    def test_handle_decrease_light_brightness_fuzzy_search(self):
+        # Device exists but STT is fuzzy
+        fake_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.decrease.light.brightness",
+            {"device": "test_switch"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "decrease_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value="test_light") as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_decrease_light_brightness(fake_message)
+                    self.assertTrue(mock_bus.called)
+                    self.assertTrue(mock_fuzzy_search.called)
+                    self.assertTrue(mock_call.called)
+
+    def test_handle_decrease_light_brightness_device_does_not_exist(self):
+        # Device does not exist
+        bad_message = FakeMessage(
+            "ovos.phal.plugin.homeassistant.decrease.light.brightness",
+            {"device": "NOT REAL"},
+            None,
+        )
+        with patch.object(self.plugin.device_types["light"], "decrease_brightness") as mock_call:
+            with patch.object(self.plugin, "fuzzy_match_name", return_value=None) as mock_fuzzy_search:
+                with patch.object(self.plugin.bus, "emit") as mock_bus:
+                    self.plugin.handle_decrease_light_brightness(bad_message)
                     self.assertFalse(mock_call.called)
                     self.assertTrue(mock_bus.called)
                     self.assertTrue(mock_fuzzy_search.called)

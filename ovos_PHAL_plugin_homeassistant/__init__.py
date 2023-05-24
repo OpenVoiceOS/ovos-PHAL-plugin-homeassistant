@@ -18,7 +18,8 @@ from ovos_PHAL_plugin_homeassistant.logic.device import (HomeAssistantSensor,
                                                          HomeAssistantClimate, HomeAssistantCamera)
 from ovos_PHAL_plugin_homeassistant.logic.integration import Integrator
 from ovos_PHAL_plugin_homeassistant.logic.utils import (map_entity_to_device_type,
-                                                        check_if_device_type_is_group)
+                                                        check_if_device_type_is_group,
+                                                        get_percentage_brightness_from_ha_value)
 from ovos_config.config import update_mycroft_config
 
 SUPPORTED_DEVICES = {
@@ -74,6 +75,9 @@ class HomeAssistantPlugin(PHALPlugin):
                     self.handle_call_supported_function)
         self.bus.on("ovos.phal.plugin.homeassistant.start.oauth.flow", self.handle_start_oauth_flow)
         self.bus.on("ovos.phal.plugin.homeassistant.assist.intent", self.handle_assist_message)
+        self.bus.on("ovos.phal.plugin.homeassistant.get.light.brightness", self.handle_get_light_brightness)
+        self.bus.on("ovos.phal.plugin.homeassistant.set.light.brightness", self.handle_set_light_brightness)
+        self.bus.on("ovos.phal.plugin.homeassistant.increase.light.brightness", self.handle_increase_light_brightness)
 
         # GUI EVENTS
         self.bus.on("ovos-PHAL-plugin-homeassistant.home",
@@ -431,6 +435,81 @@ class HomeAssistantPlugin(PHALPlugin):
             response = "Device id or function name not provided"
             LOG.error(response)
             return self.bus.emit(message.response(data={"device": spoken_device, "response": response}))
+
+    def handle_get_light_brightness(self, message):
+        """ Handle the get light brightness message
+
+        Args:
+            message (Message): The message object
+        """
+        device_id, spoken_device = self._gather_device_id(message)
+        if device_id is not None:
+            for device in self.registered_devices:
+                if device.device_id == device_id:
+                    return self.bus.emit(message.response(
+                        data={
+                            "device": spoken_device,
+                            "brightness": get_percentage_brightness_from_ha_value(device.get_brightness())
+                            }))
+        else:
+            response = "Device id not provided"
+            LOG.error(response)
+            return self.bus.emit(message.response(data={"device": spoken_device, "response": response}))
+
+    def handle_set_light_brightness(self, message):
+        """ Handle the set light brightness message
+
+        Args:
+            message (Message): The message object
+        """
+        device_id, spoken_device = self._gather_device_id(message)
+        brightness = message.data.get("brightness")
+        for device in self.registered_devices:
+            if device.device_id == device_id:
+                device.set_brightness(brightness)
+                return self.bus.emit(message.response(data={
+                    "device": spoken_device,
+                    "brightness": get_percentage_brightness_from_ha_value(brightness)
+                    }))
+        response = "Device id not provided"
+        LOG.error(response)
+        return self.bus.emit(message.response(data={"device": spoken_device, "response": response}))
+
+    def handle_increase_light_brightness(self, message):
+        """ Handle the increase light brightness message
+
+        Args:
+            message (Message): The message object
+        """
+        device_id, spoken_device = self._gather_device_id(message)
+        for device in self.registered_devices:
+            if device.device_id == device_id:
+                brightness = device.increase_brightness()
+                return self.bus.emit(message.response(data={
+                    "device": spoken_device,
+                    "brightness": get_percentage_brightness_from_ha_value(brightness)
+                    }))
+        response = "Device id not provided"
+        LOG.error(response)
+        return self.bus.emit(message.response(data={"device": spoken_device, "response": response}))
+
+    def handle_decrease_light_brightness(self, message):
+        """ Handle the decrease light brightness message
+
+        Args:
+            message (Message): The message object
+        """
+        device_id, spoken_device = self._gather_device_id(message)
+        for device in self.registered_devices:
+            if device.device_id == device_id:
+                brightness = device.decrease_brightness()
+                return self.bus.emit(message.response(data={
+                    "device": spoken_device,
+                    "brightness": get_percentage_brightness_from_ha_value(brightness)
+                    }))
+        response = "Device id not provided"
+        LOG.error(response)
+        return self.bus.emit(message.response(data={"device": spoken_device, "response": response}))
 
     def handle_get_device_display_model(self, message):
         """ Handle the get device display model message

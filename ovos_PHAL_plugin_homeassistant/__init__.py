@@ -6,7 +6,7 @@ from typing import Optional
 
 from pfzy import fuzzy_match
 from ovos_utils.log import LOG
-from mycroft_bus_client.message import Message
+from ovos_bus_client import Message
 from ovos_plugin_manager.phal import PHALPlugin
 from ovos_utils.gui import GUIInterface
 from ovos_PHAL_plugin_homeassistant.logic.connector import HomeAssistantRESTConnector, HomeAssistantWSConnector
@@ -44,7 +44,6 @@ class HomeAssistantPlugin(PHALPlugin):
                 config (dict): The plugin configuration
         """
         super().__init__(bus=bus, name="ovos-PHAL-plugin-homeassistant", config=config)
-        LOG.level = "DEBUG"
         self.oauth_client_id = None
         self.munged_id = "ovos-PHAL-plugin-homeassistant_homeassistant-phal-plugin"
         self.temporary_instance = None
@@ -404,6 +403,14 @@ class HomeAssistantPlugin(PHALPlugin):
         self.bus.emit(message.response(data=None))
 
     def _gather_device_id(self, message):
+        """Given a bus message, return the device ID and spoken device name for reference
+
+        Args:
+            message (Message): Bus message from GUI or VUI, or other source
+
+        Returns:
+            Tuple[Optional[str], str]: original device ID or device search result or None, spoken device name (str)
+        """
         device_id = message.data.get("device_id", None)
         device = message.data.get("device", None)
         spoken_device = deepcopy(device) or device_id

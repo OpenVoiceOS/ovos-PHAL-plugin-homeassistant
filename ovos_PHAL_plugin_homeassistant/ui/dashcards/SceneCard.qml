@@ -30,7 +30,7 @@ Item {
             Label {
                 id: sensorName
                 anchors.fill: parent
-                text: device.state.toUpperCase()
+                text: "Activate"
                 font.pixelSize: 20
                 fontSizeMode: Text.Fit
                 minimumPixelSize: 10

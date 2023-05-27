@@ -16,7 +16,7 @@ Item {
     Button {
         id: sceneTemplateButton
         height: Mycroft.Units.gridUnit * 6
-        width: parent.width - Mycroft.Units.gridUnit / 2        
+        width: parent.width - Mycroft.Units.gridUnit / 2
         anchors.centerIn: parent
 
         background: Rectangle {
@@ -41,11 +41,7 @@ Item {
         }
 
         onClicked: {
-            if(device.state == "off") {
                 Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_on", { "device_id": device.id })
-            } else {
-                Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_off", { "device_id": device.id })
-            }
         }
 
         onPressed: {

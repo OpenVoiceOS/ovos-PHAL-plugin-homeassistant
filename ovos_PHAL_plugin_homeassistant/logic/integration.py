@@ -1,7 +1,7 @@
-from ovos_utils.log import LOG
-from mycroft_bus_client.message import Message
+from ovos_bus_client.message import Message
 from youtube_search import YoutubeSearch
 from pytube import YouTube
+
 
 class Integrator:
     # Class handles the integration of the plugin with the rest of the system
@@ -17,9 +17,10 @@ class Integrator:
         self.register_bus_listeners()
         
     def register_bus_listeners(self):
-        self.bus.on('ovos.phal.plugin.homeassistant.integration.query_media', self.handle_query_media)
+        self.bus.on('ovos.phal.plugin.homeassistant.integration.query_media',
+                    self.handle_query_media)
         
-    def handle_query_media(self, message):
+    def handle_query_media(self, message: Message):
         """ Handle a query to the media. 
         Args:
             message (Message): The message from the bus.
@@ -34,11 +35,15 @@ class Integrator:
             collected_results = collected_results[:3]
         tube_prefix = "https://www.youtube.com/watch?v="
         for result in collected_results:
-            yt = YouTube(tube_prefix + result["id"]).streams.filter(progressive=True, file_extension='mp4')
+            yt = YouTube(tube_prefix +
+                         result["id"]).streams.filter(progressive=True,
+                                                      file_extension='mp4')
             stream = yt.first()
             result["stream_url"] = stream.url
 
-        self.gui.send_event("ovos.phal.plugin.homeassistant.integration.query_media.result", {"results": collected_results})
+        self.gui.send_event(
+            "ovos.phal.plugin.homeassistant.integration.query_media.result",
+            {"results": collected_results})
          
 
         

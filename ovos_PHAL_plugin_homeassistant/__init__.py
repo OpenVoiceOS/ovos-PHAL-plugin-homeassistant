@@ -35,6 +35,7 @@ SUPPORTED_DEVICES = {
             "automation": HomeAssistantAutomation,
         }
 
+
 class HomeAssistantPlugin(PHALPlugin):
     def __init__(self, bus=None, config=None):
         """ Initialize the plugin
@@ -43,7 +44,8 @@ class HomeAssistantPlugin(PHALPlugin):
                 bus (MycroftBusClient): The Mycroft bus client
                 config (dict): The plugin configuration
         """
-        super().__init__(bus=bus, name="ovos-PHAL-plugin-homeassistant", config=config)
+        super().__init__(bus=bus, name="ovos-PHAL-plugin-homeassistant",
+                         config=config)
         self.oauth_client_id = None
         self.munged_id = "ovos-PHAL-plugin-homeassistant_homeassistant-phal-plugin"
         self.temporary_instance = None
@@ -51,7 +53,8 @@ class HomeAssistantPlugin(PHALPlugin):
         self.registered_devices = []  # Device objects
         self.registered_device_names = []  # Device friendly/entity names
         self.bus = bus
-        self.gui = GUIInterface(bus=self.bus, skill_id=self.name)
+        self.gui = GUIInterface(bus=self.bus, skill_id=self.name,
+                                config=self.config_core.get('gui'))
         self.integrator = Integrator(self.bus, self.gui)
         self.instance_available = False
         self.use_ws = False

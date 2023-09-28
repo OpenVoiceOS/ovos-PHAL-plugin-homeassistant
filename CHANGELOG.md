@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.0.4a2](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a2) (2023-09-28)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a1...0.0.4a2)
+
+**Implemented enhancements:**
+
+- \[ENHANCEMENT\] Respect Voice Assistant device exposure settings [\#37](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/37)
+
+**Closed issues:**
+
+- \[FEAT\] Add possibility to stream camera [\#39](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/39)
+
+**Merged pull requests:**
+
+- feat: respect assist [\#38](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/38) ([mikejgray](https://github.com/mikejgray))
+
 ## [0.0.4a1](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a1) (2023-08-29)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.3...0.0.4a1)

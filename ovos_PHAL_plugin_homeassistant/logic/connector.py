@@ -14,15 +14,17 @@ import nested_lookup
 
 
 class HomeAssistantConnector:
-    def __init__(self, host, api_key):
+    def __init__(self, host, api_key, assist_only=True):
         """Constructor
 
         Args:
             host (str): The host of the home assistant instance.
             api_key (str): The api key
+            assist_only (bool): Whether to only pull entities exposed to Assist. Default True.
         """
         self.host = host
         self.api_key = api_key
+        self.assist_only = assist_only
         self.event_listeners = {}
 
     @abstractmethod
@@ -131,8 +133,8 @@ class HomeAssistantConnector:
 
 
 class HomeAssistantRESTConnector(HomeAssistantConnector):
-    def __init__(self, host, api_key):
-        super().__init__(host, api_key)
+    def __init__(self, host, api_key, assist_only):
+        super().__init__(host, api_key, assist_only)
         self.headers = {
             "Authorization": "Bearer " + self.api_key,
             "content-type": "application/json",
@@ -306,8 +308,8 @@ class HomeAssistantRESTConnector(HomeAssistantConnector):
 
 
 class HomeAssistantWSConnector(HomeAssistantConnector):
-    def __init__(self, host, api_key):
-        super().__init__(host, api_key)
+    def __init__(self, host, api_key, assist_only=True):
+        super().__init__(host, api_key, assist_only)
         if self.host.startswith("http"):
             self.host.replace("http", "ws", 1)
         self._connection = HomeAssistantClient(self.host, self.api_key)

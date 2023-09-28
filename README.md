@@ -60,6 +60,7 @@ The config also takes some optional properties:
 
 `brightness_increment` - the amount to increment/decrement the brightness of a light when the brightness up/down commands are sent. The default value is 10 and represents a percentage, e.g. 10%.
 `search_confidence_threshold` - the confidence threshold for the search skill to use when searching for devices. The default value is 0.5, or 50%. Must be a value between 0 and 1.
+`assist_only` - whether to pull down only entities exposed to Assist. Default True.
 
 Sample config:
 

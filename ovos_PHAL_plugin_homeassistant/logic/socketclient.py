@@ -9,9 +9,10 @@ from ovos_utils.log import LOG
 
 
 class HomeAssistantClient:
-    def __init__(self, url, token):
+    def __init__(self, url, token, assist_only=True):
         self.url = url
         self.token = token
+        self.assist_only = assist_only
         self.websocket = None
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
@@ -149,7 +150,7 @@ class HomeAssistantClient:
             await asyncio.sleep(0.1)
         return self
 
-    async def build_registries(self):
+    async def build_registries(self, assist_only: bool):
         # First clean  the registries
         self._device_registry = {}
         self._entity_registry = {}
@@ -168,8 +169,11 @@ class HomeAssistantClient:
         message = await self.response_queue.get()
         self.response_queue.task_done()
         for item in message["result"]:
-            item_id = item["entity_id"]
-            self._entity_registry[item_id] = item
+            if assist_only and item.get("options", {}).get("conversation", {}).get("should_expose") is False:
+                LOG.debug(f"{item['entity_id']} is not exposed to Assist, skipping")
+            else:
+                item_id = item["entity_id"]
+                self._entity_registry[item_id] = item
 
         # area registry
         await self.send_command("config/area_registry/list")
@@ -186,7 +190,7 @@ class HomeAssistantClient:
         """Return device registry."""
         if not self._device_registry:
             asyncio.run_coroutine_threadsafe(
-                self.build_registries(), self.loop)
+                self.build_registries(assist_only=self.assist_only), self.loop)
             LOG.debug("Registry is empty, building registry first.")
         return self._device_registry
 
@@ -195,7 +199,7 @@ class HomeAssistantClient:
         """Return device registry."""
         if not self._entity_registry:
             asyncio.run_coroutine_threadsafe(
-                self.build_registries(), self.loop)
+                self.build_registries(assist_only=self.assist_only), self.loop)
             LOG.debug("Registry is empty, building registry first.")
         return self._entity_registry
 
@@ -204,7 +208,7 @@ class HomeAssistantClient:
         """Return device registry."""
         if not self._area_registry:
             asyncio.run_coroutine_threadsafe(
-                self.build_registries(), self.loop)
+                self.build_registries(assist_only=self.assist_only), self.loop)
             LOG.debug("Registry is empty, building registry first.")
         return self._area_registry
 
@@ -272,7 +276,7 @@ class HomeAssistantClient:
 
     def build_registries_sync(self):
         task = asyncio.run_coroutine_threadsafe(
-            self.build_registries(), self.loop)
+            self.build_registries(assist_only=self.assist_only), self.loop)
         return task.result()
 
     def register_event_listener(self, listener):

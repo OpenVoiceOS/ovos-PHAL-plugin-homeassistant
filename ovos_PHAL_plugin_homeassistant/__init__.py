@@ -757,8 +757,9 @@ class HomeAssistantPlugin(PHALPlugin):
         @param message: Message associated with oauth start request
         @return:
         """
-        resp = self.bus.wait_for_response(message.forward(
-            "oauth.get.app.host.info"), "oauth.app.host.info.response", 10)
+        message = message.forward("oauth.get.app.host.info")
+        resp = self.bus.wait_for_response(message,
+                                          "oauth.app.host.info.response")
         if not resp:
             raise RuntimeError(f"No response from oauth plugin to message: "
                                f"{message.msg_type}: {message.data}")
@@ -825,13 +826,15 @@ class HomeAssistantPlugin(PHALPlugin):
         """
         app_id = "homeassistant-phal-plugin"
         skill_id = "ovos-PHAL-plugin-homeassistant"
-        resp = self.bus.wait_for_response(
-            message.forward("oauth.generate.qr.request",
-                            {"app_id": app_id, "skill_id": skill_id}),
-            "oauth.generate.qr.response")
+        message = message.forward("oauth.generate.qr.request",
+                                  {"app_id": app_id, "skill_id": skill_id})
+        resp = self.bus.wait_for_response(message,
+                                          "oauth.generate.qr.response")
         if not resp:
             raise RuntimeError(f"No response from oauth plugin to message: "
                                f"{message.msg_type}: {message.data}")
+        if resp.data.get('error'):
+            raise RuntimeError(resp.data['error'])
         self.handle_qr_oauth_response(resp)
 
     def handle_qr_oauth_response(self, message):

@@ -654,19 +654,13 @@ class HomeAssistantPlugin(PHALPlugin):
 
             self.gui["dashboardModel"] = display_list_model
             self.gui["instanceAvailable"] = True
-            self.gui.send_event("ovos.phal.plugin.homeassistant.change.dashboard", {
-                                "dash_type": "main"})
-            page = join(dirname(__file__), "ui", "Dashboard.qml")
-            self.gui["use_group_display"] = self.config.get("use_group_display", False)
-            self.gui.show_page(page, override_idle=True)
         else:
             self.gui["dashboardModel"] = {"items": []}
             self.gui["instanceAvailable"] = False
-            self.gui.send_event("ovos.phal.plugin.homeassistant.change.dashboard", {
-                                "dash_type": "main"})
-            page = join(dirname(__file__), "ui", "Dashboard.qml")
-            self.gui["use_group_display"] = self.config.get("use_group_display", False)
-            self.gui.show_page(page, override_idle=True)
+        self.gui.send_event("ovos.phal.plugin.homeassistant.change.dashboard", {
+                            "dash_type": "main"})
+        self.gui["use_group_display"] = self.config.get("use_group_display", False)
+        self.gui.show_page("Dashboard", override_idle=True)
 
         LOG.debug("Using group display")
         LOG.debug(self.config["use_group_display"])
@@ -805,13 +799,14 @@ class HomeAssistantPlugin(PHALPlugin):
 
     def handle_qr_oauth_response(self, message):
         qr_code_url = message.data.get("qr", None)
+        LOG.info(f"Got qr code: {qr_code_url}")
         self.gui.send_event("ovos.phal.plugin.homeassistant.oauth.qr.update", {
             "qr": qr_code_url
         })
 
     def handle_token_oauth_response(self, message):
-        response = message.data
-        access_token = response.get("access_token", None)
+        LOG.debug(f"Got oauth token response")
+        access_token = message.data.get("access_token", None)
         if access_token:
             self.get_long_term_token(access_token)
 

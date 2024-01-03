@@ -102,7 +102,7 @@ Rectangle {
                         "device_id": deviceControlsLoader.device.id,
                         "function_name": "turn_on",
                         "function_args": {"brightness": deviceControlsLoader.device.attributes.brightness, "rgb_color": rgbColor}
-                    })
+                    }, {"session": {"session_id": "default"}})
                 }
                 onPressed: {
                     setDeviceColorButton.opacity = 0.5

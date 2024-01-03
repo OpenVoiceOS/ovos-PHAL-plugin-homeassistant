@@ -124,7 +124,7 @@ ItemDelegate {
                     "thumb": modelData.thumbnails[0]
                 }
             }
-        })
+        }, {"session": {"session_id": "default"}})
         deviceControlsLoader.closeSheet()
     }
 }

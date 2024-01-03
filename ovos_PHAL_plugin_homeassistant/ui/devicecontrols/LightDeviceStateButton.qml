@@ -62,10 +62,10 @@ Button {
         deviceStateButtonControlAnimation.start()
 
         if(deviceControlsLoader.device.state == "on") {
-            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_off", { "device_id": device.id })
+            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_off", { "device_id": device.id }, {"session": {"session_id": "default"}})
             deviceControlsLoader.createdControlsEnabled = false
         } else {
-            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_on", { "device_id": device.id })
+            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_on", { "device_id": device.id }, {"session": {"session_id": "default"}})
             deviceControlsLoader.createdControlsEnabled = true
         }
     }

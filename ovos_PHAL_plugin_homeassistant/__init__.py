@@ -53,7 +53,9 @@ class HomeAssistantPlugin(PHALPlugin):
         self.registered_device_names = []  # Device friendly/entity names
         self.bus = bus
         self.gui = GUIInterface(bus=self.bus, skill_id=self.name,
-                                config=self.config_core.get('gui'))
+                                config=self.config_core.get('gui'),
+                                ui_directories={"qt5": join(dirname(__file__),
+                                                            "ui")})
         self.integrator = Integrator(self.bus, self.gui)
         self.instance_available = False
         self.use_ws = False

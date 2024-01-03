@@ -51,7 +51,7 @@ class HomeAssistantPlugin(PHALPlugin):
         self.connector = None
         self.registered_devices = []  # Device objects
         self.registered_device_names = []  # Device friendly/entity names
-        self.bus = bus
+
         self.gui = GUIInterface(bus=self.bus, skill_id=self.name,
                                 config=self.config_core.get('gui'),
                                 ui_directories={"qt5": join(dirname(__file__),
@@ -110,9 +110,8 @@ class HomeAssistantPlugin(PHALPlugin):
         self.bus.on("configuration.patch", self.init_configuration)
 
         # LISTEN FOR OAUTH RESPONSE
-        self.bus.on("oauth.app.host.info.response", self.handle_oauth_host_info)
-        self.bus.on("oauth.generate.qr.response", self.handle_qr_oauth_response)
-        self.bus.on(f"oauth.token.response.{self.munged_id}", self.handle_token_oauth_response)
+        self.bus.on(f"oauth.token.response.{self.munged_id}",
+                    self.handle_token_oauth_response)
 
         self.init_configuration()
 
@@ -393,7 +392,7 @@ class HomeAssistantPlugin(PHALPlugin):
 
         # No device found
         LOG.debug(f"No Home Assistant device exists for {device}")
-        self.bus.emit(message.response(data=None))
+        self.bus.emit(message.response())
 
     def _return_device_response(self, message, device_id) -> None:
         """Return the device representation to the bus
@@ -406,7 +405,7 @@ class HomeAssistantPlugin(PHALPlugin):
             if device.device_id == device_id:
                 return self.bus.emit(message.response(data=device.get_device_display_model()))
         LOG.debug(f"No device found with device ID {device_id}")
-        self.bus.emit(message.response(data=None))
+        self.bus.emit(message.response())
 
     def handle_turn_on(self, message):
         """ Handle the turn on message
@@ -422,7 +421,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     return self.bus.emit(message.response(data={"device": spoken_device}))
         # No device found
         LOG.debug(f"No Home Assistant device exists for {device_id}")
-        self.bus.emit(message.response(data=None))
+        self.bus.emit(message.response())
 
     def handle_turn_off(self, message):
         """ Handle the turn off message
@@ -438,7 +437,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     return self.bus.emit(message.response(data={"device": spoken_device}))
         # No device found
         LOG.debug(f"No Home Assistant device exists for {device_id}")
-        self.bus.emit(message.response(data=None))
+        self.bus.emit(message.response())
 
     def _gather_device_id(self, message):
         """Given a bus message, return the device ID and spoken device name for reference
@@ -612,7 +611,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     self.bus.emit(message.response(
                         data=device.get_device_display_model()))
                     return
-        self.bus.emit(message.response(data=None))
+        self.bus.emit(message.response())
 
     def handle_get_device_display_list_model(self, message):
         """ Handle the get device display list model message
@@ -636,7 +635,7 @@ class HomeAssistantPlugin(PHALPlugin):
         if self.connector and type(self.connector) in (HomeAssistantWSConnector, HomeAssistantRESTConnector):
             self.bus.emit(message.response(data=self.connector.send_assist_command(command)))
         else:
-            self.bus.emit(message.response(data=None))
+            self.bus.emit(message.response())
 
 # GUI INTERFACE HANDLERS
     def handle_show_dashboard(self, message=None):
@@ -752,8 +751,13 @@ class HomeAssistantPlugin(PHALPlugin):
             self.handle_show_dashboard()
 
 # OAuth QR Code Flow Handlers
-    def request_host_info_from_oauth(self):
-        self.bus.emit(Message("oauth.get.app.host.info"))
+    def request_host_info_from_oauth(self, message):
+        resp = self.bus.wait_for_response(message.forward(
+            "oauth.get.app.host.info"), "oauth.app.host.info.response", 10)
+        if not resp:
+            raise RuntimeError(f"No response from oauth plugin to message: "
+                               f"{message.msg_type}: {message.data}")
+        self.handle_oauth_host_info(resp)
 
     def handle_oauth_host_info(self, message):
         host = message.data.get("host", None)
@@ -762,7 +766,7 @@ class HomeAssistantPlugin(PHALPlugin):
 
         if self.temporary_instance:
             self.oauth_register()
-            self.start_oauth_flow()
+            self.start_oauth_flow(message)
 
     def handle_start_oauth_flow(self, message):
         """ Handle the start oauth flow message
@@ -770,10 +774,12 @@ class HomeAssistantPlugin(PHALPlugin):
             Args:
                 message (Message): The message object
         """
-        instance = message.data.get("instance", None)
+        instance = message.data.get("instance")
         if instance:
             self.temporary_instance = instance.lower()
-            self.request_host_info_from_oauth()
+            self.request_host_info_from_oauth(message)
+        else:
+            LOG.error(f"`instance` missing from message: {message.msg_type}")
 
     def oauth_register(self):
         """ Register the phal plugin with the oauth service """
@@ -790,14 +796,17 @@ class HomeAssistantPlugin(PHALPlugin):
             "refresh_endpoint": "",
         }))
 
-    def start_oauth_flow(self):
-        host = self.temporary_instance.replace("ws://", "http://").replace("wss://", "https://")
+    def start_oauth_flow(self, message):
         app_id = "homeassistant-phal-plugin"
         skill_id = "ovos-PHAL-plugin-homeassistant"
-        self.bus.emit(Message("oauth.generate.qr.request", {
-            "app_id": app_id,
-            "skill_id": skill_id
-        }))
+        resp = self.bus.wait_for_response(
+            message.forward("oauth.generate.qr.request",
+                            {"app_id": app_id, "skill_id": skill_id}),
+            "oauth.generate.qr.response", 10)
+        if not resp:
+            raise RuntimeError(f"No response from oauth plugin to message: "
+                               f"{message.msg_type}: {message.data}")
+        self.handle_qr_oauth_response(resp)
 
     def handle_qr_oauth_response(self, message):
         qr_code_url = message.data.get("qr", None)

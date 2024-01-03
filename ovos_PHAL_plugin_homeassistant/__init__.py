@@ -763,20 +763,24 @@ class HomeAssistantPlugin(PHALPlugin):
         host = message.data.get("host", None)
         port = message.data.get("port", None)
         self.oauth_client_id = f"http://{host}:{port}"
-
+        LOG.info(f"Got oauth endpoint: {self.oauth_client_id}")
         if self.temporary_instance:
             self.oauth_register()
             self.start_oauth_flow(message)
+        else:
+            LOG.error(f"Unexpected oauth message: {message.msg_type}")
 
     def handle_start_oauth_flow(self, message):
-        """ Handle the start oauth flow message
+        """
+        Handle a request to start oauth login, i.e. from a GUI page
 
             Args:
                 message (Message): The message object
         """
-        instance = message.data.get("instance")
+        instance = message.data.get("instance").lower()
         if instance:
-            self.temporary_instance = instance.lower()
+            LOG.info(f"Starting oauth for: {instance}")
+            self.temporary_instance = instance
             self.request_host_info_from_oauth(message)
         else:
             LOG.error(f"`instance` missing from message: {message.msg_type}")
@@ -786,6 +790,7 @@ class HomeAssistantPlugin(PHALPlugin):
         host = self.temporary_instance.replace("ws://", "http://").replace("wss://", "https://")
         auth_endpoint = f"{host}/auth/authorize"
         token_endpoint = f"{host}/auth/token"
+        LOG.debug(f"Registering oauth client: {self.oauth_client_id}")
         self.bus.emit(Message("oauth.register", {
             "client_id": self.oauth_client_id,
             "skill_id": "ovos-PHAL-plugin-homeassistant",
@@ -802,7 +807,7 @@ class HomeAssistantPlugin(PHALPlugin):
         resp = self.bus.wait_for_response(
             message.forward("oauth.generate.qr.request",
                             {"app_id": app_id, "skill_id": skill_id}),
-            "oauth.generate.qr.response", 10)
+            "oauth.generate.qr.response")
         if not resp:
             raise RuntimeError(f"No response from oauth plugin to message: "
                                f"{message.msg_type}: {message.data}")

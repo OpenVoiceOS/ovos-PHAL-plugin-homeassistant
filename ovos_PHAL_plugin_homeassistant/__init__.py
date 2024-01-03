@@ -752,6 +752,11 @@ class HomeAssistantPlugin(PHALPlugin):
 
 # OAuth QR Code Flow Handlers
     def request_host_info_from_oauth(self, message):
+        """
+        Get the oauth server configuration for this device
+        @param message: Message associated with oauth start request
+        @return:
+        """
         resp = self.bus.wait_for_response(message.forward(
             "oauth.get.app.host.info"), "oauth.app.host.info.response", 10)
         if not resp:
@@ -760,6 +765,10 @@ class HomeAssistantPlugin(PHALPlugin):
         self.handle_oauth_host_info(resp)
 
     def handle_oauth_host_info(self, message):
+        """
+        Handle a response message with oauth host/port for this device
+        @param message: oauth.app.host.info.response Message from oauth plugin
+        """
         host = message.data.get("host", None)
         port = message.data.get("port", None)
         self.oauth_client_id = f"http://{host}:{port}"
@@ -781,13 +790,20 @@ class HomeAssistantPlugin(PHALPlugin):
         if instance:
             LOG.info(f"Starting oauth for: {instance}")
             self.temporary_instance = instance
-            self.request_host_info_from_oauth(message)
+            try:
+                self.request_host_info_from_oauth(message)
+            except Exception as e:
+                LOG.exception(e)
+                self.temporary_instance = None
+                # TODO: notify setup failed
         else:
             LOG.error(f"`instance` missing from message: {message.msg_type}")
 
     def oauth_register(self):
         """ Register the phal plugin with the oauth service """
-        host = self.temporary_instance.replace("ws://", "http://").replace("wss://", "https://")
+        host = self.temporary_instance.replace("ws://",
+                                               "http://").replace("wss://",
+                                                                  "https://")
         auth_endpoint = f"{host}/auth/authorize"
         token_endpoint = f"{host}/auth/token"
         LOG.debug(f"Registering oauth client: {self.oauth_client_id}")
@@ -802,6 +818,11 @@ class HomeAssistantPlugin(PHALPlugin):
         }))
 
     def start_oauth_flow(self, message):
+        """
+        Send a message to the oauth plugin to generate a QR code for connecting
+        to this device for HomeAssistant login
+        @param message: Message associated with oauth request
+        """
         app_id = "homeassistant-phal-plugin"
         skill_id = "ovos-PHAL-plugin-homeassistant"
         resp = self.bus.wait_for_response(
@@ -814,7 +835,11 @@ class HomeAssistantPlugin(PHALPlugin):
         self.handle_qr_oauth_response(resp)
 
     def handle_qr_oauth_response(self, message):
-        qr_code_url = message.data.get("qr", None)
+        """
+        Handle a response message with a path to a QR code to display
+        @param message: oauth.generate.qr.response
+        """
+        qr_code_url = message.data.get("qr")
         LOG.info(f"Got qr code: {qr_code_url}")
         self.gui.send_event("ovos.phal.plugin.homeassistant.oauth.qr.update", {
             "qr": qr_code_url

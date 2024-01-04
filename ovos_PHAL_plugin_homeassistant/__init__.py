@@ -808,15 +808,20 @@ class HomeAssistantPlugin(PHALPlugin):
         auth_endpoint = f"{host}/auth/authorize"
         token_endpoint = f"{host}/auth/token"
         LOG.debug(f"Registering oauth client: {self.oauth_client_id}")
-        self.bus.emit(Message("oauth.register", {
-            "client_id": self.oauth_client_id,
-            "skill_id": "ovos-PHAL-plugin-homeassistant",
-            "app_id": "homeassistant-phal-plugin",
-            "auth_endpoint": auth_endpoint,
-            "token_endpoint": token_endpoint,
-            "shell_integration": False,
-            "refresh_endpoint": "",
-        }))
+        resp = self.bus.wait_for_response(Message(
+            "oauth.register", {
+                "client_id": self.oauth_client_id,
+                "skill_id": "ovos-PHAL-plugin-homeassistant",
+                "app_id": "homeassistant-phal-plugin",
+                "auth_endpoint": auth_endpoint,
+                "token_endpoint": token_endpoint,
+                "shell_integration": False,
+                "refresh_endpoint": "",
+            }))
+        if not resp:
+            raise TimeoutError("No oauth registration response!")
+        if resp.data.get('error'):
+            raise RuntimeError(resp.data['error'])
 
     def start_oauth_flow(self, message):
         """

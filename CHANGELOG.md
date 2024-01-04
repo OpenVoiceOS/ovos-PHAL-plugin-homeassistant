@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.4a3](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a3) (2024-01-04)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a2...0.0.4a3)
+
+**Closed issues:**
+
+- OAuth periodically doesn't produce a functioning token [\#46](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/46)
+
+**Merged pull requests:**
+
+- Update GUI resource and session context handling [\#47](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/47) ([NeonDaniel](https://github.com/NeonDaniel))
+
 ## [0.0.4a2](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a2) (2023-09-28)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a1...0.0.4a2)

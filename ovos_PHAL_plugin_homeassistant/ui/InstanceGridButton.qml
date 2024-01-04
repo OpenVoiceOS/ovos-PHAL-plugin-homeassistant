@@ -24,7 +24,7 @@ Rectangle {
     Keys.onReturnPressed: {
         loginChoiceStackLayout.currentIndex = index
         if (gridItem.hasAction) {
-            Mycroft.MycroftController.sendRequest(action, actionData)
+            Mycroft.MycroftController.sendRequest(action, actionData, {"session": {"session_id": "default"}})
         }
     }
 
@@ -35,7 +35,7 @@ Rectangle {
             loginChoiceStackLayout.currentIndex = index
             
             if (gridItem.hasAction) {
-                Mycroft.MycroftController.sendRequest(action, actionData)
+                Mycroft.MycroftController.sendRequest(action, actionData, {"session": {"session_id": "default"}})
             }
         }
 

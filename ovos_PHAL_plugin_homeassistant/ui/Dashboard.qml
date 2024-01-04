@@ -48,9 +48,9 @@ Mycroft.Delegate {
                 var dev_type = tabBarModel[bar.currentIndex].type
                 if(dev_type != "main") {
                     if (dashboardRoot.useGroupDisplay) {
-                        Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.update.area.dashboard", {"area_type": dev_type})
+                        Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.update.area.dashboard", {"area_type": dev_type}, {"session": {"session_id": "default"}})
                     } else {
-                        Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.update.device.dashboard", {"device_type": dev_type})
+                        Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.update.device.dashboard", {"device_type": dev_type}, {"session": {"session_id": "default"}})
                     }
                 }
             }
@@ -93,9 +93,9 @@ Mycroft.Delegate {
             var dev_type = tabBarModel[bar.currentIndex].type
             if(dev_type != "main") {
                 if (dashboardRoot.useGroupDisplay) {
-                    Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.update.area.dashboard", {"area_type": dev_type})
+                    Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.update.area.dashboard", {"area_type": dev_type}, {"session": {"session_id": "default"}})
                 } else {
-                    Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.update.device.dashboard", {"device_type": dev_type})
+                    Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.update.device.dashboard", {"device_type": dev_type}, {"session": {"session_id": "default"}})
                 }
             }
             break
@@ -250,9 +250,9 @@ Mycroft.Delegate {
 
                             onCheckedChanged:{
                                 if(checked) {
-                                    Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.set.group.display.settings", {"use_group_display": true})
+                                    Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.set.group.display.settings", {"use_group_display": true}, {"session": {"session_id": "default"}})
                                 } else {
-                                    Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.set.group.display.settings", {"use_group_display": false})
+                                    Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.set.group.display.settings", {"use_group_display": false}, {"session": {"session_id": "default"}})
                                 }
                             }
                         }
@@ -283,7 +283,7 @@ Mycroft.Delegate {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
-                                Mycroft.MycroftController.sendRequest("ovos-PHAL-plugin-homeassistant.close", {})
+                                Mycroft.MycroftController.sendRequest("ovos-PHAL-plugin-homeassistant.close", {}, {"session": {"session_id": "default"}})
                             }
                         }
                     }
@@ -540,9 +540,9 @@ Mycroft.Delegate {
                                             dashboardSwipeView.currentIndex = 0
                                         } else {
                                             if(dashboardRoot.useGroupDisplay) {
-                                                Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.show.area.dashboard", {"area": modelData.type})
+                                                Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.show.area.dashboard", {"area": modelData.type}, {"session": {"session_id": "default"}})
                                             } else {
-                                                Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.show.device.dashboard", {"device_type": modelData.type})
+                                                Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.show.device.dashboard", {"device_type": modelData.type}, {"session": {"session_id": "default"}})
                                             }
                                         }
                                     }

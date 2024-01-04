@@ -119,10 +119,10 @@ Control {
                     onClicked: {
                         console.log(device.state)
                         if(device.state == "off") {
-                            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_on", { "device_id": device.id })
+                            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_on", { "device_id": device.id }, {"session": {"session_id": "default"}})
                         }
                         else {
-                            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_off", { "device_id": device.id })
+                            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.device.turn_off", { "device_id": device.id }, {"session": {"session_id": "default"}})
                         }
                     }
 
@@ -169,7 +169,7 @@ Control {
                             "device_id": device.id,
                             "function_name": "media_previous_track",
                             "function_args": {}
-                        })
+                        }, {"session": {"session_id": "default"}})
                     }
                     onPressed: {
                         previousButtonOverlayColor.color = Qt.lighter(Kirigami.Theme.highlightColor, 1.5)
@@ -215,13 +215,13 @@ Control {
                                 "device_id": device.id,
                                 "function_name": "play_media",
                                 "function_args": {}
-                            })
+                            }, {"session": {"session_id": "default"}})
                         } else if(device.state == "playing") {
                             Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.call.supported.function", {
                                 "device_id": device.id,
                                 "function_name": "media_pause",
                                 "function_args": {}
-                            })
+                            }, {"session": {"session_id": "default"}})
                         }
                     }
                     onPressed: {
@@ -266,7 +266,7 @@ Control {
                         Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.call.supported.function", {
                             "device_id": device.id,
                             "function": "media_next_track"
-                        })
+                        }, {"session": {"session_id": "default"}})
                     }
                     onPressed: {
                         nextButtonOverlayColor.color = Qt.lighter(Kirigami.Theme.highlightColor, 1.5)
@@ -399,7 +399,7 @@ Control {
                             "device_id": device.id,
                             "function_name": "volume_down",
                             "function_args": {}
-                        })
+                        }, {"session": {"session_id": "default"}})
                     }
                     onPressed: {
                         lowerVolumeButtonOverlayColor.color = Qt.lighter(Kirigami.Theme.highlightColor, 1.5)
@@ -445,7 +445,7 @@ Control {
                             "device_id": device.id,
                             "function_name": "volume_up",
                             "function_args": {}
-                        })
+                        }, {"session": {"session_id": "default"}})
                     }
                     onPressed: {
                         higherVolumeButtonOverlayColor.color = Qt.lighter(Kirigami.Theme.highlightColor, 1.5)

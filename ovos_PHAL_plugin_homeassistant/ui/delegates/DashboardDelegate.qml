@@ -88,9 +88,9 @@ ItemDelegate {
 
     onClicked: {
         if(dashboardRoot.useGroupDisplay) {
-            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.show.area.dashboard", {"area": deviceType})    
+            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.show.area.dashboard", {"area": deviceType}, {"session": {"session_id": "default"}})
         } else {
-            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.show.device.dashboard", {"device_type": deviceType})
+            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.show.device.dashboard", {"device_type": deviceType}, {"session": {"session_id": "default"}})
         }
         change_tab_to_type(deviceType)
     }

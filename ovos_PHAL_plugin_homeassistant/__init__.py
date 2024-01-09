@@ -820,8 +820,8 @@ class HomeAssistantPlugin(PHALPlugin):
             }))
         if not resp:
             raise TimeoutError("No oauth registration response!")
-        if resp.data.get('error'):
-            raise RuntimeError(resp.data['error'])
+        if resp.data.get("error"):
+            raise RuntimeError(resp.data["error"])
 
     def start_oauth_flow(self, message):
         """
@@ -838,8 +838,8 @@ class HomeAssistantPlugin(PHALPlugin):
         if not resp:
             raise RuntimeError(f"No response from oauth plugin to message: "
                                f"{message.msg_type}: {message.data}")
-        if resp.data.get('error'):
-            raise RuntimeError(resp.data['error'])
+        if resp.data.get("error"):
+            raise RuntimeError(resp.data["error"])
         self.handle_qr_oauth_response(resp)
 
     def handle_qr_oauth_response(self, message):

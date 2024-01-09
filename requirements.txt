@@ -4,7 +4,7 @@ ovos-config~=0.0.5
 youtube-search~=2.1
 pytube~=12.1
 websockets~=10.4
-ovos-PHAL-plugin-oauth~=0.0.1
+ovos-PHAL-plugin-oauth~=0.0.1,>=0.0.3a2
 nested-lookup~=0.2
 ovos-bus-client~=0.0.3
 webcolors~=1.13

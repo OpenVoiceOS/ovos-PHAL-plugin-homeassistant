@@ -787,7 +787,7 @@ class HomeAssistantPlugin(PHALPlugin):
             Args:
                 message (Message): The message object
         """
-        instance = message.data.get("instance").lower()
+        instance = message.data.get("instance", "").lower()
         if instance:
             LOG.info(f"Starting oauth for: {instance}")
             self.temporary_instance = instance
@@ -819,7 +819,9 @@ class HomeAssistantPlugin(PHALPlugin):
                 "refresh_endpoint": "",
             }))
         if not resp:
-            raise TimeoutError("No oauth registration response!")
+            raise TimeoutError(f"No oauth registration response for endpoint: "
+                               f"{auth_endpoint}. "
+                               f"client_id={self.oauth_client_id}")
         if resp.data.get("error"):
             raise RuntimeError(resp.data["error"])
 

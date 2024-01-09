@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.4a4](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a4) (2024-01-09)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a3...0.0.4a4)
+
+**Merged pull requests:**
+
+- Refactor oauth flow [\#48](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/48) ([NeonDaniel](https://github.com/NeonDaniel))
+
 ## [0.0.4a3](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a3) (2024-01-04)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a2...0.0.4a3)

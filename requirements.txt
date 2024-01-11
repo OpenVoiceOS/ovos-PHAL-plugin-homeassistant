@@ -1,5 +1,5 @@
 ovos-plugin-manager~=0.0.23
-ovos-utils~=0.0.27
+ovos-utils~=0.0.27,<1.0.0
 ovos-config~=0.0.5
 youtube-search~=2.1
 pytube~=12.1

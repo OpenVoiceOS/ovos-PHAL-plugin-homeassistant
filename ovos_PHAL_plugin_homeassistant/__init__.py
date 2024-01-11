@@ -6,7 +6,7 @@ from typing import Optional
 from ovos_utils.log import LOG
 from ovos_bus_client import Message
 from ovos_plugin_manager.phal import PHALPlugin
-from ovos_utils.gui import GUIInterface
+from ovos_bus_client.apis.gui import GUIInterface
 from ovos_utils.parse import match_one
 from ovos_PHAL_plugin_homeassistant.logic.connector import HomeAssistantRESTConnector, HomeAssistantWSConnector
 from ovos_PHAL_plugin_homeassistant.logic.device import (HomeAssistantSensor,

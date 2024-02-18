@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,missing-class-docstring,missing-module-docstring
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from ovos_utils.messagebus import FakeBus, FakeMessage
 from ovos_PHAL_plugin_homeassistant import HomeAssistantPlugin, SUPPORTED_DEVICES
@@ -12,6 +12,9 @@ class FakeConnector:
 
     def register_callback(self, callback, *args):
         self.callbacks.append(callback)
+    
+    def turn_off(self, *args):
+        return
 
 
 class TestHomeAssistantPlugin(unittest.TestCase):
@@ -619,3 +622,24 @@ class TestHomeAssistantPlugin(unittest.TestCase):
                 mock_call.assert_called_with("turn_on", {"brightness_step_pct": -20})
                 fake_bulb.decrease_brightness(50)
                 mock_call.assert_called_with("turn_on", {"brightness_step_pct": -50})
+
+    def test_automation_turns_off_if_configured(self):
+        automation_connector = FakeConnector()
+        automation_connector.turn_off = Mock()
+        self.plugin.registered_devices.pop()
+        self.plugin.registered_devices.append(
+        self.plugin.device_types["automation"](
+            automation_connector,
+            "test_automation",
+            "mdi:automation",
+            "test_automation",
+            "on",
+            {"friendly_name": "Test Automation"},
+            "Living Room",
+            None,
+            True,
+        )
+        )
+        self.plugin.handle_turn_off(FakeMessage("ovos.phal.plugin.homeassistant.turn.off", {"device_id": "test_automation"}, None))
+        self.plugin.bus.once("ovos.phal.plugin.homeassistant.turn.off.response", Mock())
+        automation_connector.turn_off.assert_called_with("test_automation", "test_automation")

@@ -117,7 +117,10 @@ class HomeAssistantPlugin(PHALPlugin):
 
     def handle_check_connected(self, message: Message):
         """Return a bus response indicating whether the plugin is connected to a Home Assistant instance."""
-        self.bus.emit(message.response(data={"connected": self.instance_available}))
+        self.log.info(f"Checking connection to Home Assistant instance: {self.instance_available}")
+        self.bus.emit(
+            message.response(data={"connected": self.instance_available}, context=message.context)
+            )
 
     def get_brightness_increment(self) -> int:
         """ Get the brightness increment from the config

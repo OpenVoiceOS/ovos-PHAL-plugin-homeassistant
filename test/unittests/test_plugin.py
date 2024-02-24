@@ -619,3 +619,31 @@ class TestHomeAssistantPlugin(unittest.TestCase):
                 mock_call.assert_called_with("turn_on", {"brightness_step_pct": -20})
                 fake_bulb.decrease_brightness(50)
                 mock_call.assert_called_with("turn_on", {"brightness_step_pct": -50})
+
+    def test_handle_check_not_connected(self):
+        responded = False
+        def handle_response(message):
+            nonlocal responded
+            self.plugin.log.info(message.data)
+            responded = True
+            self.assertFalse(self.plugin.instance_available)
+            self.assertFalse(message.data["connected"])
+        self.plugin.bus.run_forever()
+        self.plugin.bus.once("ovos.phal.plugin.homeassistant.connected.response", handle_response)
+        fake_message = FakeMessage("ovos.phal.plugin.homeassistant.connected", {}, None)
+        self.plugin.handle_check_connected(fake_message)
+        self.assertTrue(responded)
+
+    def test_handle_check_connected(self):
+        responded = False
+        def handle_response(message):
+            nonlocal responded
+            self.plugin.log.info(message.data)
+            responded = True
+            self.assertTrue(message.data["connected"])
+        self.plugin.bus.run_forever()
+        self.plugin.bus.once("ovos.phal.plugin.homeassistant.connected.response", handle_response)
+        fake_message = FakeMessage("ovos.phal.plugin.homeassistant.connected", {}, None)
+        self.plugin.instance_available = True
+        self.plugin.handle_check_connected(fake_message)
+        self.assertTrue(responded)

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.4a8](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a8) (2024-05-14)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a7...0.0.4a8)
+
+**Merged pull requests:**
+
+- feat: ability to turn off automations [\#53](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/53) ([mikejgray](https://github.com/mikejgray))
+
+## [0.0.4a7](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a7) (2024-05-06)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a6...0.0.4a7)
+
 ## [0.0.4a6](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a6) (2024-02-17)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a5...0.0.4a6)

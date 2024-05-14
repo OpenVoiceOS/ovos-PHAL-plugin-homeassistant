@@ -136,6 +136,15 @@ class HomeAssistantPlugin(PHALPlugin):
         """
         return self.config.get("search_confidence_threshold", 0.5)
 
+    @property
+    def toggle_automations(self) -> bool:
+        """ Get the toggle automations from the config
+
+            Returns:
+                bool: The toggle automations value, default False
+        """
+        return self.config.get("toggle_automations", False)
+
 # SETUP INSTANCE SUPPORT
     def validate_instance_connection(self, host, api_key, assist_only):
         """ Validate the connection to the Home Assistant instance
@@ -251,9 +260,12 @@ class HomeAssistantPlugin(PHALPlugin):
                     device_attributes = device.get("attributes", {})
                     if device_type in self.device_types:
                         LOG.debug(f"Device added: {device_name} - {device_type} - {device_area}")
-                        self.registered_devices.append(self.device_types[device_type](
-                            self.connector, device_id, device_icon, device_name,
-                            device_state, device_attributes, device_area, self.device_updated))
+                        dev_args = [self.connector, device_id, device_icon, device_name,
+                            device_state, device_attributes, device_area, self.device_updated]
+                        if device_type == "automation":
+                            # Since automations.turn_off is usually disabled, we need to be explicit about the config
+                            dev_args.append(self.toggle_automations)
+                        self.registered_devices.append(self.device_types[device_type](*dev_args))
                         self.registered_device_names.append(device_name)
                     else:
                         LOG.warning(f"Device type {device_type} not supported; please file an issue on GitHub")

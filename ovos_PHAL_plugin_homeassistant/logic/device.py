@@ -845,11 +845,16 @@ class HomeAssistantAutomation(HomeAssistantDevice):
         device_attributes,
         device_area=None,
         update_signal=None,
+        toggle_automations=False,
     ):
         super().__init__(
             connector, device_id, device_icon, device_name, device_state, device_attributes, device_area, update_signal
         )
+        self.toggle_automations = toggle_automations
 
     def turn_off(self):
-        LOG.warning("Request to turn off an automation. This is not supported, as it will disable it instead.")
-        return
+        if self.toggle_automations is True:
+            super().turn_off()
+        else:
+            LOG.warning("Request to turn off an automation. This is not supported, as it will disable it instead.")
+            return

@@ -46,7 +46,7 @@ class HomeAssistantClient:
     async def _connect(self):
         try:
             uri = f"{self.url}/api/websocket"
-            self.websocket = await websockets.connect(uri)
+            self.websocket = await websockets.connect(uri=uri, close_timeout=5, open_timeout=5)
 
             # Wait for the auth_required message
             message = await self.websocket.recv()

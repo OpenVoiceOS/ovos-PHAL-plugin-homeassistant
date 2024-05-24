@@ -61,6 +61,14 @@ class HomeAssistantClient:
                     return
             else:
                 raise Exception("Expected auth_required message")
+        except asyncio.CancelledError:
+            LOG.exception("Connection cancelled, likely due to change in network configuration")
+            await self._disconnect()
+            return
+        except TimeoutError:
+            LOG.exception("Connection timed out, disconnecting")
+            await self._disconnect()
+            return
         except Exception as e:
             LOG.exception(e)
             await self._disconnect()

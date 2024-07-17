@@ -3,23 +3,34 @@ from copy import deepcopy
 from os.path import dirname, join
 from typing import Optional
 
-from ovos_utils.log import LOG
 from ovos_bus_client import Message
-from ovos_plugin_manager.phal import PHALPlugin
 from ovos_bus_client.apis.gui import GUIInterface
-from ovos_utils.parse import match_one
-from ovos_PHAL_plugin_homeassistant.logic.connector import HomeAssistantRESTConnector, HomeAssistantWSConnector
-from ovos_PHAL_plugin_homeassistant.logic.device import (HomeAssistantSensor,
-                                                         HomeAssistantBinarySensor,
-                                                         HomeAssistantLight, HomeAssistantAutomation,
-                                                         HomeAssistantMediaPlayer, HomeAssistantScene,
-                                                         HomeAssistantVacuum, HomeAssistantSwitch,
-                                                         HomeAssistantClimate, HomeAssistantCamera)
-from ovos_PHAL_plugin_homeassistant.logic.integration import Integrator
-from ovos_PHAL_plugin_homeassistant.logic.utils import (map_entity_to_device_type,
-                                                        check_if_device_type_is_group,
-                                                        get_percentage_brightness_from_ha_value)
 from ovos_config.config import update_mycroft_config
+from ovos_plugin_manager.phal import PHALPlugin
+from ovos_utils import classproperty
+from ovos_utils.log import LOG
+from ovos_utils.parse import match_one
+from ovos_utils.process_utils import RuntimeRequirements
+
+from ovos_PHAL_plugin_homeassistant.logic.connector import HomeAssistantRESTConnector, HomeAssistantWSConnector
+from ovos_PHAL_plugin_homeassistant.logic.device import (
+    HomeAssistantAutomation,
+    HomeAssistantBinarySensor,
+    HomeAssistantCamera,
+    HomeAssistantClimate,
+    HomeAssistantLight,
+    HomeAssistantMediaPlayer,
+    HomeAssistantScene,
+    HomeAssistantSensor,
+    HomeAssistantSwitch,
+    HomeAssistantVacuum,
+)
+from ovos_PHAL_plugin_homeassistant.logic.integration import Integrator
+from ovos_PHAL_plugin_homeassistant.logic.utils import (
+    check_if_device_type_is_group,
+    get_percentage_brightness_from_ha_value,
+    map_entity_to_device_type,
+)
 
 SUPPORTED_DEVICES = {
             "sensor": HomeAssistantSensor,
@@ -114,6 +125,15 @@ class HomeAssistantPlugin(PHALPlugin):
                     self.handle_token_oauth_response)
 
         self.init_configuration()
+
+    @classproperty
+    def runtime_requirements(self):
+        return RuntimeRequirements(internet_before_load=False,
+                                   network_before_load=True,
+                                   requires_internet=False,
+                                   requires_network=True,
+                                   no_internet_fallback=True,
+                                   no_network_fallback=False)
 
     def handle_check_connected(self, message: Message):
         """Return a bus response indicating whether the plugin is connected to a Home Assistant instance."""

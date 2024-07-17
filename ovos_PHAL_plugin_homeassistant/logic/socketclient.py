@@ -46,7 +46,7 @@ class HomeAssistantClient:
     async def _connect(self):
         try:
             uri = f"{self.url}/api/websocket"
-            self.websocket = await websockets.connect(uri)
+            self.websocket = await websockets.connect(uri=uri, close_timeout=5, open_timeout=5)
 
             # Wait for the auth_required message
             message = await self.websocket.recv()
@@ -61,6 +61,14 @@ class HomeAssistantClient:
                     return
             else:
                 raise Exception("Expected auth_required message")
+        except asyncio.CancelledError:
+            LOG.exception("Connection cancelled, likely due to change in network configuration")
+            await self._disconnect()
+            return
+        except TimeoutError:
+            LOG.exception("Connection timed out, disconnecting")
+            await self._disconnect()
+            return
         except Exception as e:
             LOG.exception(e)
             await self._disconnect()

@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.0.4a9](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a9) (2024-07-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a8...0.0.4a9)
+
+**Fixed bugs:**
+
+- \[BUG\] Failure to reach Home Assistant DNS causes neon-enclosure to timeout and fail [\#40](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/40)
+
+**Closed issues:**
+
+- Uncaught exception if HomeAssistant cannot be reached [\#56](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/56)
+- yt-dlp 2024.4.1.232704.dev0 requires websockets\>=12.0, but you have websockets 10.4 which is incompatible. [\#55](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/55)
+- Plugin should wait for network connectivity [\#54](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/54)
+- Incompatability with latest ovos-dinkum-listener [\#42](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/42)
+
+**Merged pull requests:**
+
+- fix: numerous issues [\#57](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/57) ([mikejgray](https://github.com/mikejgray))
+
 ## [0.0.4a8](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a8) (2024-05-14)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a7...0.0.4a8)

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.4a10](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a10) (2024-09-14)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a9...0.0.4a10)
+
+**Merged pull requests:**
+
+- fix:semver [\#59](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/59) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.0.4a9](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a9) (2024-07-17)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a8...0.0.4a9)

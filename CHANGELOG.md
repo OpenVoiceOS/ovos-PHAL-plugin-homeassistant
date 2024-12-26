@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.4a11](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a11) (2024-12-26)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a10...0.0.4a11)
+
+**Merged pull requests:**
+
+- chore: allow newer ovos-bus-client [\#60](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/60) ([mikejgray](https://github.com/mikejgray))
+
 ## [0.0.4a10](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a10) (2024-09-14)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a9...0.0.4a10)

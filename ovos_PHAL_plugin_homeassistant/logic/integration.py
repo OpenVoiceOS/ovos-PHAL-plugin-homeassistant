@@ -5,7 +5,7 @@ from pytube import YouTube
 
 class Integrator:
     # Class handles the integration of the plugin with the rest of the system
-    
+
     def __init__(self, bus, gui):
         """ Constructor 
         Args:
@@ -15,11 +15,11 @@ class Integrator:
         self.bus = bus
         self.gui = gui
         self.register_bus_listeners()
-        
+
     def register_bus_listeners(self):
         self.bus.on('ovos.phal.plugin.homeassistant.integration.query_media',
                     self.handle_query_media)
-        
+
     def handle_query_media(self, message: Message):
         """ Handle a query to the media. 
         Args:
@@ -44,7 +44,3 @@ class Integrator:
         self.gui.send_event(
             "ovos.phal.plugin.homeassistant.integration.query_media.result",
             {"results": collected_results})
-         
-
-        
-

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.4a12](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a12) (2025-01-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a11...0.0.4a12)
+
+**Merged pull requests:**
+
+- feat: rebuild device list [\#63](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/63) ([mikejgray](https://github.com/mikejgray))
+
 ## [0.0.4a11](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a11) (2024-12-26)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a10...0.0.4a11)

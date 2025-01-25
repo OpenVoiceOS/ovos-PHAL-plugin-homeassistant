@@ -97,6 +97,7 @@ class HomeAssistantPlugin(PHALPlugin):
         self.bus.on("ovos.phal.plugin.homeassistant.get.light.color", self.handle_get_light_color)
         self.bus.on("ovos.phal.plugin.homeassistant.set.light.color", self.handle_set_light_color)
         self.bus.on("ovos.phal.plugin.homeassistant.check_connected", self.handle_check_connected)
+        self.bus.on("ovos.phal.plugin.homeassistant.rebuild.device.list", self.build_devices)
 
         # GUI EVENTS
         self.bus.on("ovos-PHAL-plugin-homeassistant.home",
@@ -262,7 +263,7 @@ class HomeAssistantPlugin(PHALPlugin):
             self.bus.emit(
                 Message("ovos.phal.plugin.homeassistant.requires.configuration"))
 
-    def build_devices(self):
+    def build_devices(self, message: Optional[Message] = None):
         """ Build the devices from the Home Assistant API """
         for device in self.devices:
             device_type = map_entity_to_device_type(device["entity_id"])

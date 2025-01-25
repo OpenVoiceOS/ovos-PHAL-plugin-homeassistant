@@ -883,6 +883,9 @@ class HomeAssistantPlugin(PHALPlugin):
         @param message: oauth.generate.qr.response
         """
         qr_code_url = message.data.get("qr")
+        if qr_code_url is None:
+            self.gui.show_notification("Failed to get QR code for Home Assistant login!")
+            return
         LOG.info(f"Got qr code: {qr_code_url}")
         self.gui.send_event("ovos.phal.plugin.homeassistant.oauth.qr.update", {
             "qr": qr_code_url

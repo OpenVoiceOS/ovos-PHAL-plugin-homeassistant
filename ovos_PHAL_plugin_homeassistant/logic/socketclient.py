@@ -9,10 +9,11 @@ from ovos_utils.log import LOG
 
 
 class HomeAssistantClient:
-    def __init__(self, url, token, assist_only=True):
+    def __init__(self, url, token, assist_only=True, max_ws_message_size=5242880):
         self.url = url
         self.token = token
         self.assist_only = assist_only
+        self.max_ws_message_size = max_ws_message_size
         self.websocket = None
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
@@ -29,6 +30,9 @@ class HomeAssistantClient:
         self._area_registry = {}
 
     async def authenticate(self):
+        if not self.websocket:
+            LOG.error("WS HA Connection not established")
+            return
         await self.websocket.send(f'{{"type": "auth", "access_token": "{self.token}"}}')
         message = await self.websocket.recv()
         LOG.debug(message)
@@ -46,7 +50,7 @@ class HomeAssistantClient:
     async def _connect(self):
         try:
             uri = f"{self.url}/api/websocket"
-            self.websocket = await websockets.connect(uri=uri, close_timeout=5, open_timeout=5)
+            self.websocket = await websockets.connect(uri=uri, close_timeout=5, open_timeout=5, max_size=self.max_ws_message_size)
 
             # Wait for the auth_required message
             message = await self.websocket.recv()

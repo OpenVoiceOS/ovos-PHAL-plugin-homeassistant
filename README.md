@@ -62,6 +62,7 @@ The config also takes some optional properties:
 `search_confidence_threshold` - the confidence threshold for the search skill to use when searching for devices. The default value is 0.5, or 50%. Must be a value between 0 and 1.
 `assist_only` - whether to pull down only entities exposed to Assist. Default True.
 `toggle_automations` - whether to allow the plugin to turn automations on and off. Default False.
+`max_ws_message_size` - the maximum size of a websocket message in bytes. Default 5242880 (5 MB).
 
 Sample config:
 
@@ -73,6 +74,7 @@ Sample config:
                 "brightness_increment": 5,
                 "search_confidence_threshold": 0.6,
                 "toggle_automations": false,
+                "max_ws_message_size": 5242880,
             }
         }
 ```

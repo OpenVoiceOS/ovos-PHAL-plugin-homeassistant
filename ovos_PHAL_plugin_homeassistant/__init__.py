@@ -166,6 +166,15 @@ class HomeAssistantPlugin(PHALPlugin):
         """
         return self.config.get("toggle_automations", False)
 
+    @property
+    def max_ws_message_size(self) -> int:
+        """ Get the maximum websocket message size from the config
+        
+            Returns:
+                int: The maximum websocket message size, default 5242880
+        """
+        return self.config.get("max_ws_message_size", 5242880)
+
 # SETUP INSTANCE SUPPORT
     def validate_instance_connection(self, host, api_key, assist_only):
         """ Validate the connection to the Home Assistant instance
@@ -245,12 +254,14 @@ class HomeAssistantPlugin(PHALPlugin):
                     configuration_host,
                     configuration_api_key,
                     configuration_assist_only
+                    self.max_ws_message_size
                 )
             else:
                 self.connector = HomeAssistantRESTConnector(
                     configuration_host,
                     configuration_api_key,
                     configuration_assist_only
+                    self.max_ws_message_size
                 )
             self.devices = self.connector.get_all_devices()
             self.registered_devices = []

@@ -253,14 +253,14 @@ class HomeAssistantPlugin(PHALPlugin):
                 self.connector = HomeAssistantWSConnector(
                     configuration_host,
                     configuration_api_key,
-                    configuration_assist_only
+                    configuration_assist_only,
                     self.max_ws_message_size
                 )
             else:
                 self.connector = HomeAssistantRESTConnector(
                     configuration_host,
                     configuration_api_key,
-                    configuration_assist_only
+                    configuration_assist_only,
                     self.max_ws_message_size
                 )
             self.devices = self.connector.get_all_devices()

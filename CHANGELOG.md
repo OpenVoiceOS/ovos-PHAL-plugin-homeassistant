@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.4a14](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a14) (2025-02-06)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a13...0.0.4a14)
+
+**Fixed bugs:**
+
+- \[BUG\] Missing comma [\#66](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/66)
+
+**Merged pull requests:**
+
+- Fix typos in `init_configuration` [\#67](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/67) ([NeonDaniel](https://github.com/NeonDaniel))
+
 ## [0.0.4a13](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a13) (2025-02-03)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a12...0.0.4a13)

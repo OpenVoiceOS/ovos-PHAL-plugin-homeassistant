@@ -308,11 +308,11 @@ class HomeAssistantRESTConnector(HomeAssistantConnector):
 
 
 class HomeAssistantWSConnector(HomeAssistantConnector):
-    def __init__(self, host, api_key, assist_only=True):
+    def __init__(self, host, api_key, assist_only=True, max_ws_message_size=5242880):
         super().__init__(host, api_key, assist_only)
         if self.host.startswith("http"):
             self.host.replace("http", "ws", 1)
-        self._connection = HomeAssistantClient(self.host, self.api_key)
+        self._connection = HomeAssistantClient(url=self.host, token=self.api_key, max_ws_message_size=max_ws_message_size)
         self._connection.connect()
 
         # Initialize client instance

@@ -2,7 +2,7 @@
 
 The PHAL Plugin provides GUI interfaces and API for Home Assistant Instants.
 
-NOTE: this plugin is roadmapped for merging with https://github.com/OpenVoiceOS/ovos-PHAL-plugin-commonIOT for ovos-core release 0.0.9, the UI will become IOT framework agnostic
+NOTE: this plugin will be merged with its companion skill and archived in the future.
 
 # Demo GIF
 
@@ -90,6 +90,12 @@ The plugin is in early development, so there are some features that are not yet 
 - Vacuum
 - Binary Sensor
 - Sensor
+
+### Troubleshooting
+
+The websocket API does not expose entity information in the same way as the REST API, so some friendly names and aliases (especially for Assist) will not be available. PRs welcome to work around this limitation. Otherwise, we recommend using the REST API instead of the Websocket API.
+
+To switch to the REST API, change the URL in the config to `https://yoururl.toinstance` instead of `wss://yoururl.toinstance`.
 
 ---
 

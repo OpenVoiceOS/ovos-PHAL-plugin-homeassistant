@@ -261,7 +261,6 @@ class HomeAssistantPlugin(PHALPlugin):
                     configuration_host,
                     configuration_api_key,
                     configuration_assist_only,
-                    self.max_ws_message_size
                 )
             self.devices = self.connector.get_all_devices()
             self.registered_devices = []

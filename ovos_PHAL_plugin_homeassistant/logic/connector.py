@@ -311,7 +311,9 @@ class HomeAssistantWSConnector(HomeAssistantConnector):
     def __init__(self, host, api_key, assist_only=True, max_ws_message_size=5242880):
         super().__init__(host, api_key, assist_only)
         if self.host.startswith("http"):
-            self.host.replace("http", "ws", 1)
+            self.host = self.host.replace("http", "ws", 1)
+        if self.host.startswith("https"):
+            self.host = self.host.replace("https", "wss", 1)
         self._connection = HomeAssistantClient(url=self.host, token=self.api_key, max_ws_message_size=max_ws_message_size)
         self._connection.connect()
 

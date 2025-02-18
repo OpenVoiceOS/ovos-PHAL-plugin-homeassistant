@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.4a15](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a15) (2025-02-18)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a14...0.0.4a15)
+
+**Merged pull requests:**
+
+- fix: ws size [\#68](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/pull/68) ([mikejgray](https://github.com/mikejgray))
+
 ## [0.0.4a14](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/tree/0.0.4a14) (2025-02-06)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/compare/0.0.4a13...0.0.4a14)
@@ -19,7 +27,6 @@
 **Closed issues:**
 
 - \[BUG\] PayloadTooBig error on plugin load/init [\#62](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/62)
-- consider moving to websocket-client\>=0.54.0 instead, as it is already a dependency of ovos-bus-client [\#58](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/58)
 - Raise and handle an exception if qr\_code\_url is not generated [\#49](https://github.com/OpenVoiceOS/ovos-PHAL-plugin-homeassistant/issues/49)
 
 **Merged pull requests:**

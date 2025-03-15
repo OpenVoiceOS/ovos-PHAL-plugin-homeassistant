@@ -88,7 +88,7 @@ Rectangle {
                         deviceControlsLoader.forceActiveFocus()
                         Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.integration.query_media", {
                             "phrase": localMediaSearchField.text
-                        })
+                        }, {"session": {"session_id": "default"}})
                         busyIndicatorVisible = true
                     }
                 }
@@ -125,7 +125,7 @@ Rectangle {
                     deviceControlsLoader.forceActiveFocus()
                     Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.integration.query_media", {
                         "phrase": localMediaSearchField.text
-                    })
+                    }, {"session": {"session_id": "default"}})
                     busyIndicatorVisible = true
                 }
                 onPressed: {

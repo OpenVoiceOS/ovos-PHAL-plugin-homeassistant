@@ -117,7 +117,7 @@ RowLayout {
         }
 
         onClicked: {
-            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.setup.instance", {"url": instanceSetupPopupUrl.text, "api_key": instanceSetupPopupApiKey.text})
+            Mycroft.MycroftController.sendRequest("ovos.phal.plugin.homeassistant.setup.instance", {"url": instanceSetupPopupUrl.text, "api_key": instanceSetupPopupApiKey.text}, {"session": {"session_id": "default"}})
             instaceSetupPopupBox.close()
         }
 

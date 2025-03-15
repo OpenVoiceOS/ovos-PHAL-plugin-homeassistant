@@ -97,7 +97,7 @@ Rectangle {
                             "device_id": deviceControlsLoader.device.id,
                             "function_name": "turn_on",
                             "function_args": {"brightness": Math.round(value / 100 * 255)}
-                        })
+                        }, {"session": {"session_id": "default"}})
                     }
                 }
 

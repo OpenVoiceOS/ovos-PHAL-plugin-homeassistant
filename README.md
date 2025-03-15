@@ -2,7 +2,7 @@
 
 The PHAL Plugin provides GUI interfaces and API for Home Assistant Instants.
 
-NOTE: this plugin is roadmapped for merging with https://github.com/OpenVoiceOS/ovos-PHAL-plugin-commonIOT for ovos-core release 0.0.9, the UI will become IOT framework agnostic
+NOTE: this plugin will be merged with its companion skill and archived in the future.
 
 # Demo GIF
 
@@ -60,6 +60,9 @@ The config also takes some optional properties:
 
 `brightness_increment` - the amount to increment/decrement the brightness of a light when the brightness up/down commands are sent. The default value is 10 and represents a percentage, e.g. 10%.
 `search_confidence_threshold` - the confidence threshold for the search skill to use when searching for devices. The default value is 0.5, or 50%. Must be a value between 0 and 1.
+`assist_only` - whether to pull down only entities exposed to Assist. Default True.
+`toggle_automations` - whether to allow the plugin to turn automations on and off. Default False.
+`max_ws_message_size` - the maximum size of a websocket message in bytes. Default 5242880 (5 MB).
 
 Sample config:
 
@@ -69,7 +72,9 @@ Sample config:
                 "host": "https://someurl.toinstance",
                 "api_key": "api key from the instance",
                 "brightness_increment": 5,
-                "search_confidence_threshold": 0.6
+                "search_confidence_threshold": 0.6,
+                "toggle_automations": false,
+                "max_ws_message_size": 5242880,
             }
         }
 ```
@@ -85,6 +90,12 @@ The plugin is in early development, so there are some features that are not yet 
 - Vacuum
 - Binary Sensor
 - Sensor
+
+### Troubleshooting
+
+The websocket API does not expose entity information in the same way as the REST API, so some friendly names and aliases (especially for Assist) will not be available. PRs welcome to work around this limitation. Otherwise, we recommend using the REST API instead of the Websocket API.
+
+To switch to the REST API, change the URL in the config to `https://yoururl.toinstance` instead of `wss://yoururl.toinstance`.
 
 ---
 

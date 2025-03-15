@@ -3,23 +3,34 @@ from copy import deepcopy
 from os.path import dirname, join
 from typing import Optional
 
-from ovos_utils.log import LOG
 from ovos_bus_client import Message
-from ovos_plugin_manager.phal import PHALPlugin
-from ovos_utils.gui import GUIInterface
-from ovos_utils.parse import match_one
-from ovos_PHAL_plugin_homeassistant.logic.connector import HomeAssistantRESTConnector, HomeAssistantWSConnector
-from ovos_PHAL_plugin_homeassistant.logic.device import (HomeAssistantSensor,
-                                                         HomeAssistantBinarySensor,
-                                                         HomeAssistantLight, HomeAssistantAutomation,
-                                                         HomeAssistantMediaPlayer, HomeAssistantScene,
-                                                         HomeAssistantVacuum, HomeAssistantSwitch,
-                                                         HomeAssistantClimate, HomeAssistantCamera)
-from ovos_PHAL_plugin_homeassistant.logic.integration import Integrator
-from ovos_PHAL_plugin_homeassistant.logic.utils import (map_entity_to_device_type,
-                                                        check_if_device_type_is_group,
-                                                        get_percentage_brightness_from_ha_value)
+from ovos_bus_client.apis.gui import GUIInterface
 from ovos_config.config import update_mycroft_config
+from ovos_plugin_manager.phal import PHALPlugin
+from ovos_utils import classproperty
+from ovos_utils.log import LOG
+from ovos_utils.parse import match_one
+from ovos_utils.process_utils import RuntimeRequirements
+
+from ovos_PHAL_plugin_homeassistant.logic.connector import HomeAssistantRESTConnector, HomeAssistantWSConnector
+from ovos_PHAL_plugin_homeassistant.logic.device import (
+    HomeAssistantAutomation,
+    HomeAssistantBinarySensor,
+    HomeAssistantCamera,
+    HomeAssistantClimate,
+    HomeAssistantLight,
+    HomeAssistantMediaPlayer,
+    HomeAssistantScene,
+    HomeAssistantSensor,
+    HomeAssistantSwitch,
+    HomeAssistantVacuum,
+)
+from ovos_PHAL_plugin_homeassistant.logic.integration import Integrator
+from ovos_PHAL_plugin_homeassistant.logic.utils import (
+    check_if_device_type_is_group,
+    get_percentage_brightness_from_ha_value,
+    map_entity_to_device_type,
+)
 
 SUPPORTED_DEVICES = {
             "sensor": HomeAssistantSensor,
@@ -51,9 +62,11 @@ class HomeAssistantPlugin(PHALPlugin):
         self.connector = None
         self.registered_devices = []  # Device objects
         self.registered_device_names = []  # Device friendly/entity names
-        self.bus = bus
+
         self.gui = GUIInterface(bus=self.bus, skill_id=self.name,
-                                config=self.config_core.get('gui'))
+                                config=self.config_core.get('gui'),
+                                ui_directories={"qt5": join(dirname(__file__),
+                                                            "ui")})
         self.integrator = Integrator(self.bus, self.gui)
         self.instance_available = False
         self.use_ws = False
@@ -83,6 +96,8 @@ class HomeAssistantPlugin(PHALPlugin):
         self.bus.on("ovos.phal.plugin.homeassistant.decrease.light.brightness", self.handle_decrease_light_brightness)
         self.bus.on("ovos.phal.plugin.homeassistant.get.light.color", self.handle_get_light_color)
         self.bus.on("ovos.phal.plugin.homeassistant.set.light.color", self.handle_set_light_color)
+        self.bus.on("ovos.phal.plugin.homeassistant.check_connected", self.handle_check_connected)
+        self.bus.on("ovos.phal.plugin.homeassistant.rebuild.device.list", self.build_devices)
 
         # GUI EVENTS
         self.bus.on("ovos-PHAL-plugin-homeassistant.home",
@@ -107,11 +122,23 @@ class HomeAssistantPlugin(PHALPlugin):
         self.bus.on("configuration.patch", self.init_configuration)
 
         # LISTEN FOR OAUTH RESPONSE
-        self.bus.on("oauth.app.host.info.response", self.handle_oauth_host_info)
-        self.bus.on("oauth.generate.qr.response", self.handle_qr_oauth_response)
-        self.bus.on(f"oauth.token.response.{self.munged_id}", self.handle_token_oauth_response)
+        self.bus.on(f"oauth.token.response.{self.munged_id}",
+                    self.handle_token_oauth_response)
 
         self.init_configuration()
+
+    @classproperty
+    def runtime_requirements(self):
+        return RuntimeRequirements(internet_before_load=False,
+                                   network_before_load=True,
+                                   requires_internet=False,
+                                   requires_network=True,
+                                   no_internet_fallback=True,
+                                   no_network_fallback=False)
+
+    def handle_check_connected(self, message: Message):
+        """Return a bus response indicating whether the plugin is connected to a Home Assistant instance."""
+        self.bus.emit(message.response(data={"connected": self.instance_available}))
 
     def get_brightness_increment(self) -> int:
         """ Get the brightness increment from the config
@@ -130,22 +157,41 @@ class HomeAssistantPlugin(PHALPlugin):
         """
         return self.config.get("search_confidence_threshold", 0.5)
 
+    @property
+    def toggle_automations(self) -> bool:
+        """ Get the toggle automations from the config
+
+            Returns:
+                bool: The toggle automations value, default False
+        """
+        return self.config.get("toggle_automations", False)
+
+    @property
+    def max_ws_message_size(self) -> int:
+        """ Get the maximum websocket message size from the config
+        
+            Returns:
+                int: The maximum websocket message size, default 5242880
+        """
+        return self.config.get("max_ws_message_size", 5242880)
+
 # SETUP INSTANCE SUPPORT
-    def validate_instance_connection(self, host, api_key):
+    def validate_instance_connection(self, host, api_key, assist_only):
         """ Validate the connection to the Home Assistant instance
 
             Args:
                 host (str): The Home Assistant instance URL
                 api_key (str): The Home Assistant API key
+                assist_only (bool): Whether to only pull entities exposed to Assist. Default True
 
             Returns:
                 bool: True if the connection is valid, False otherwise
         """
         try:
             if self.use_ws:
-                validator = HomeAssistantWSConnector(host, api_key)
+                validator = HomeAssistantWSConnector(host, api_key, assist_only)
             else:
-                validator = HomeAssistantRESTConnector(host, api_key)
+                validator = HomeAssistantRESTConnector(host, api_key, assist_only)
 
             validator.get_all_devices()
 
@@ -167,12 +213,13 @@ class HomeAssistantPlugin(PHALPlugin):
         """
         host = message.data.get("url", "")
         key = message.data.get("api_key", "")
+        assist_only = message.data.get("assist_only", True)
 
         if host and key:
             if host.startswith("ws") or host.startswith("wss"):
                 self.use_ws = True
 
-            if self.validate_instance_connection(host, key):
+            if self.validate_instance_connection(host, key, assist_only):
                 self.config["host"] = host
                 self.config["api_key"] = key
                 self.instance_available = True
@@ -193,6 +240,7 @@ class HomeAssistantPlugin(PHALPlugin):
         """ Initialize instance configuration """
         configuration_host = self.config.get("host", "")
         configuration_api_key = self.config.get("api_key", "")
+        configuration_assist_only = self.config.get("assist_only", True)
         if configuration_host.startswith("ws") or configuration_host.startswith("wss"):
             self.use_ws = True
 
@@ -202,9 +250,18 @@ class HomeAssistantPlugin(PHALPlugin):
         if configuration_host != "" and configuration_api_key != "":
             self.instance_available = True
             if self.use_ws:
-                self.connector = HomeAssistantWSConnector(configuration_host, configuration_api_key)
+                self.connector = HomeAssistantWSConnector(
+                    configuration_host,
+                    configuration_api_key,
+                    configuration_assist_only,
+                    self.max_ws_message_size
+                )
             else:
-                self.connector = HomeAssistantRESTConnector(configuration_host, configuration_api_key)
+                self.connector = HomeAssistantRESTConnector(
+                    configuration_host,
+                    configuration_api_key,
+                    configuration_assist_only,
+                )
             self.devices = self.connector.get_all_devices()
             self.registered_devices = []
             self.build_devices()
@@ -216,7 +273,7 @@ class HomeAssistantPlugin(PHALPlugin):
             self.bus.emit(
                 Message("ovos.phal.plugin.homeassistant.requires.configuration"))
 
-    def build_devices(self):
+    def build_devices(self, message: Optional[Message] = None):
         """ Build the devices from the Home Assistant API """
         for device in self.devices:
             device_type = map_entity_to_device_type(device["entity_id"])
@@ -230,13 +287,16 @@ class HomeAssistantPlugin(PHALPlugin):
                     device_icon = f"mdi:{device_type}"
                     device_state = device.get("state", None)
                     device_area = device.get("area_id", None)
-                    LOG.debug(f"Device added: {device_name} - {device_type} - {device_area}")
 
                     device_attributes = device.get("attributes", {})
                     if device_type in self.device_types:
-                        self.registered_devices.append(self.device_types[device_type](
-                            self.connector, device_id, device_icon, device_name,
-                            device_state, device_attributes, device_area, self.device_updated))
+                        LOG.debug(f"Device added: {device_name} - {device_type} - {device_area}")
+                        dev_args = [self.connector, device_id, device_icon, device_name,
+                            device_state, device_attributes, device_area, self.device_updated]
+                        if device_type == "automation":
+                            # Since automations.turn_off is usually disabled, we need to be explicit about the config
+                            dev_args.append(self.toggle_automations)
+                        self.registered_devices.append(self.device_types[device_type](*dev_args))
                         self.registered_device_names.append(device_name)
                     else:
                         LOG.warning(f"Device type {device_type} not supported; please file an issue on GitHub")
@@ -364,7 +424,6 @@ class HomeAssistantPlugin(PHALPlugin):
 
         # Device ID not provided, usually VUI
         device = message.data.get("device")
-        device_result = match_one(device, self.registered_device_names)
         device_result = self.fuzzy_match_name(
                             self.registered_devices,
                             device,
@@ -376,7 +435,7 @@ class HomeAssistantPlugin(PHALPlugin):
 
         # No device found
         LOG.debug(f"No Home Assistant device exists for {device}")
-        self.bus.emit(message.response(data=None))
+        self.bus.emit(message.response())
 
     def _return_device_response(self, message, device_id) -> None:
         """Return the device representation to the bus
@@ -389,7 +448,7 @@ class HomeAssistantPlugin(PHALPlugin):
             if device.device_id == device_id:
                 return self.bus.emit(message.response(data=device.get_device_display_model()))
         LOG.debug(f"No device found with device ID {device_id}")
-        self.bus.emit(message.response(data=None))
+        self.bus.emit(message.response())
 
     def handle_turn_on(self, message):
         """ Handle the turn on message
@@ -405,7 +464,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     return self.bus.emit(message.response(data={"device": spoken_device}))
         # No device found
         LOG.debug(f"No Home Assistant device exists for {device_id}")
-        self.bus.emit(message.response(data=None))
+        self.bus.emit(message.response())
 
     def handle_turn_off(self, message):
         """ Handle the turn off message
@@ -421,7 +480,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     return self.bus.emit(message.response(data={"device": spoken_device}))
         # No device found
         LOG.debug(f"No Home Assistant device exists for {device_id}")
-        self.bus.emit(message.response(data=None))
+        self.bus.emit(message.response())
 
     def _gather_device_id(self, message):
         """Given a bus message, return the device ID and spoken device name for reference
@@ -595,7 +654,7 @@ class HomeAssistantPlugin(PHALPlugin):
                     self.bus.emit(message.response(
                         data=device.get_device_display_model()))
                     return
-        self.bus.emit(message.response(data=None))
+        self.bus.emit(message.response())
 
     def handle_get_device_display_list_model(self, message):
         """ Handle the get device display list model message
@@ -606,7 +665,7 @@ class HomeAssistantPlugin(PHALPlugin):
         display_list_model = []
         for device in self.registered_devices:
             display_list_model.append(device.get_device_display_model())
-        self.bus.emit(message.response(data=display_list_model))
+        self.bus.emit(message.response(data=display_list_model))  # TODO: Fix type, this may be causing GUI problems
 
     def handle_assist_message(self, message):
         """Handle a passthrough message to Home Assistant's Assist API.
@@ -619,7 +678,7 @@ class HomeAssistantPlugin(PHALPlugin):
         if self.connector and type(self.connector) in (HomeAssistantWSConnector, HomeAssistantRESTConnector):
             self.bus.emit(message.response(data=self.connector.send_assist_command(command)))
         else:
-            self.bus.emit(message.response(data=None))
+            self.bus.emit(message.response())
 
 # GUI INTERFACE HANDLERS
     def handle_show_dashboard(self, message=None):
@@ -639,19 +698,13 @@ class HomeAssistantPlugin(PHALPlugin):
 
             self.gui["dashboardModel"] = display_list_model
             self.gui["instanceAvailable"] = True
-            self.gui.send_event("ovos.phal.plugin.homeassistant.change.dashboard", {
-                                "dash_type": "main"})
-            page = join(dirname(__file__), "ui", "Dashboard.qml")
-            self.gui["use_group_display"] = self.config.get("use_group_display", False)
-            self.gui.show_page(page, override_idle=True)
         else:
             self.gui["dashboardModel"] = {"items": []}
             self.gui["instanceAvailable"] = False
-            self.gui.send_event("ovos.phal.plugin.homeassistant.change.dashboard", {
-                                "dash_type": "main"})
-            page = join(dirname(__file__), "ui", "Dashboard.qml")
-            self.gui["use_group_display"] = self.config.get("use_group_display", False)
-            self.gui.show_page(page, override_idle=True)
+        self.gui.send_event("ovos.phal.plugin.homeassistant.change.dashboard", {
+                            "dash_type": "main"})
+        self.gui["use_group_display"] = self.config.get("use_group_display", False)
+        self.gui.show_page("Dashboard", override_idle=True)
 
         LOG.debug("Using group display")
         LOG.debug(self.config["use_group_display"])
@@ -720,7 +773,7 @@ class HomeAssistantPlugin(PHALPlugin):
         """
         group_settings = message.data.get("use_group_display", None)
         if group_settings is not None:
-            if group_settings == True:
+            if group_settings is True:
                 use_group_display = True
                 self.config["use_group_display"] = use_group_display
             else:
@@ -741,62 +794,116 @@ class HomeAssistantPlugin(PHALPlugin):
             self.handle_show_dashboard()
 
 # OAuth QR Code Flow Handlers
-    def request_host_info_from_oauth(self):
-        self.bus.emit(Message("oauth.get.app.host.info"))
+    def request_host_info_from_oauth(self, message):
+        """
+        Get the oauth server configuration for this device
+        @param message: Message associated with oauth start request
+        @return:
+        """
+        message = message.forward("oauth.get.app.host.info")
+        resp = self.bus.wait_for_response(message,
+                                          "oauth.app.host.info.response")
+        if not resp:
+            raise RuntimeError(f"No response from oauth plugin to message: "
+                               f"{message.msg_type}: {message.data}")
+        self.handle_oauth_host_info(resp)
 
     def handle_oauth_host_info(self, message):
+        """
+        Handle a response message with oauth host/port for this device
+        @param message: oauth.app.host.info.response Message from oauth plugin
+        """
         host = message.data.get("host", None)
         port = message.data.get("port", None)
         self.oauth_client_id = f"http://{host}:{port}"
-
+        LOG.info(f"Got oauth endpoint: {self.oauth_client_id}")
         if self.temporary_instance:
             self.oauth_register()
-            self.start_oauth_flow()
+            self.start_oauth_flow(message)
+        else:
+            LOG.error(f"Unexpected oauth message: {message.msg_type}")
 
     def handle_start_oauth_flow(self, message):
-        """ Handle the start oauth flow message
+        """
+        Handle a request to start oauth login, i.e. from a GUI page
 
             Args:
                 message (Message): The message object
         """
-        instance = message.data.get("instance", None)
+        instance = message.data.get("instance", "").lower()
         if instance:
-            self.temporary_instance = instance.lower()
-            self.request_host_info_from_oauth()
+            LOG.info(f"Starting oauth for: {instance}")
+            self.temporary_instance = instance
+            try:
+                self.request_host_info_from_oauth(message)
+            except Exception as e:
+                LOG.exception(e)
+                self.temporary_instance = None
+                # TODO: notify setup failed
+        else:
+            LOG.error(f"`instance` missing from message: {message.msg_type}")
 
     def oauth_register(self):
         """ Register the phal plugin with the oauth service """
-        host = self.temporary_instance.replace("ws://", "http://").replace("wss://", "https://")
+        host = self.temporary_instance.replace("ws://",
+                                               "http://").replace("wss://",
+                                                                  "https://")
         auth_endpoint = f"{host}/auth/authorize"
         token_endpoint = f"{host}/auth/token"
-        self.bus.emit(Message("oauth.register", {
-            "client_id": self.oauth_client_id,
-            "skill_id": "ovos-PHAL-plugin-homeassistant",
-            "app_id": "homeassistant-phal-plugin",
-            "auth_endpoint": auth_endpoint,
-            "token_endpoint": token_endpoint,
-            "shell_integration": False,
-            "refresh_endpoint": "",
-        }))
+        LOG.debug(f"Registering oauth client: {self.oauth_client_id}")
+        resp = self.bus.wait_for_response(Message(
+            "oauth.register", {
+                "client_id": self.oauth_client_id,
+                "skill_id": "ovos-PHAL-plugin-homeassistant",
+                "app_id": "homeassistant-phal-plugin",
+                "auth_endpoint": auth_endpoint,
+                "token_endpoint": token_endpoint,
+                "shell_integration": False,
+                "refresh_endpoint": "",
+            }))
+        if not resp:
+            raise TimeoutError(f"No oauth registration response for endpoint: "
+                               f"{auth_endpoint}. "
+                               f"client_id={self.oauth_client_id}")
+        if resp.data.get("error"):
+            raise RuntimeError(resp.data["error"])
 
-    def start_oauth_flow(self):
-        host = self.temporary_instance.replace("ws://", "http://").replace("wss://", "https://")
+    def start_oauth_flow(self, message):
+        """
+        Send a message to the oauth plugin to generate a QR code for connecting
+        to this device for HomeAssistant login
+        @param message: Message associated with oauth request
+        """
         app_id = "homeassistant-phal-plugin"
         skill_id = "ovos-PHAL-plugin-homeassistant"
-        self.bus.emit(Message("oauth.generate.qr.request", {
-            "app_id": app_id,
-            "skill_id": skill_id
-        }))
+        message = message.forward("oauth.generate.qr.request",
+                                  {"app_id": app_id, "skill_id": skill_id})
+        resp = self.bus.wait_for_response(message,
+                                          "oauth.generate.qr.response")
+        if not resp:
+            raise RuntimeError(f"No response from oauth plugin to message: "
+                               f"{message.msg_type}: {message.data}")
+        if resp.data.get("error"):
+            raise RuntimeError(resp.data["error"])
+        self.handle_qr_oauth_response(resp)
 
     def handle_qr_oauth_response(self, message):
-        qr_code_url = message.data.get("qr", None)
+        """
+        Handle a response message with a path to a QR code to display
+        @param message: oauth.generate.qr.response
+        """
+        qr_code_url = message.data.get("qr")
+        if qr_code_url is None:
+            self.gui.show_notification("Failed to get QR code for Home Assistant login!")
+            return
+        LOG.info(f"Got qr code: {qr_code_url}")
         self.gui.send_event("ovos.phal.plugin.homeassistant.oauth.qr.update", {
             "qr": qr_code_url
         })
 
     def handle_token_oauth_response(self, message):
-        response = message.data
-        access_token = response.get("access_token", None)
+        LOG.debug(f"Got oauth token response")
+        access_token = message.data.get("access_token", None)
         if access_token:
             self.get_long_term_token(access_token)
 
@@ -822,7 +929,7 @@ class HomeAssistantPlugin(PHALPlugin):
         It can request a new display model once it receives this signal.
 
         Args:
-            device (dict): The device that was updated.
+            device_id (dict): The device that was updated.
         """
         # GUI only event as we don't want to flood the GUI bus
         self.gui.send_event("ovos.phal.plugin.homeassistant.device.updated", {"device_id": device_id})

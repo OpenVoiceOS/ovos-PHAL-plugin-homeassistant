@@ -1,5 +1,14 @@
 # OVOS PHAL Home Assistant Plugin
 
+> **DEPRECATED**: use a dedicated skill or pipeline plugin instead, e.g. [OscillateLabsLLC/skill-homeassistant](https://github.com/OscillateLabsLLC/skill-homeassistant)
+
+a GUI interface is no longer provided via PHAL plugin
+
+a replacement bus api might be provided in the future by a hypothetical ovos-common-iot framework
+
+
+-----
+
 The PHAL Plugin provides GUI interfaces and API for Home Assistant Instants.
 
 NOTE: this plugin will be merged with its companion skill and archived in the future.
